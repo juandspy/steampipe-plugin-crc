@@ -15,9 +15,10 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			NewInstance: ConfigInstance,
 		},
 		TableMap: map[string]*plugin.Table{
-			openshiftInsightsGCSV1GatheringRules:      tableInsightsGatheringRulesV1(ctx),
-			openshiftInsightsGCSV2RemoteConfiguration: tableInsightsGatheringRulesV2(ctx),
-			openshiftInsightsAggregatorV2Clusters:     tableAggregatorClustersV2(ctx),
+			openshiftInsightsGCSV1GatheringRules:        tableInsightsGatheringRulesV1(ctx),
+			openshiftInsightsGCSV2RemoteConfiguration:   tableInsightsGatheringRulesV2(ctx),
+			openshiftInsightsAggregatorV2Clusters:       tableAggregatorClustersV2(ctx),
+			openshiftInsightsAggregatorV2ClusterReports: tableAggregatorClusterReportsV2(ctx),
 		},
 	}
 	return p

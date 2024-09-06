@@ -83,6 +83,16 @@ FROM crc.openshift_insights_aggregator_v2_clusters
 WHERE total_hit_count > 4
 ```
 
+### openshift_insights_aggregator_v2_cluster_reports
+
+#### List cluster rules with total risk
+
+```sql
+SELECT cluster_id, rule_id, total_risk
+FROM crc.openshift_insights_aggregator_v2_cluster_reports
+WHERE cluster_id = '5a78700a-e3d3-4300-a796-75bf73fc1653'
+```
+
 ### openshift_insights_gcs_v1_gathering_rules
 
 ```sql
