@@ -13,7 +13,7 @@ import (
 
 const openshiftInsightsGCSV1GatheringRules = "openshift_insights_gcs_v1_gathering_rules"
 
-type gatheringRules struct {
+type gatheringRulesV1 struct {
 	Version string `json:"version"`
 	Rules   []struct {
 		Conditions         []interface{} `json:"conditions"`
@@ -21,13 +21,12 @@ type gatheringRules struct {
 	} `json:"rules"`
 }
 
-// Define the table
-func tableInsightsGatheringRules(_ context.Context) *plugin.Table {
+func tableInsightsGatheringRulesV1(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        openshiftInsightsGCSV1GatheringRules,
-		Description: "Return the gathering rules for a given version.",
+		Description: "Return a list of versioned gathering rules.",
 		List: &plugin.ListConfig{
-			Hydrate: listGatheringRules,
+			Hydrate: listGatheringRulesV1,
 		},
 		Columns: []*plugin.Column{
 			{
@@ -52,9 +51,9 @@ func tableInsightsGatheringRules(_ context.Context) *plugin.Table {
 	}
 }
 
-// listGatheringRules populates the openshift_insights_gathering_conditions_service table with all the gathering rules in the API
-func listGatheringRules(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	const functionName = "listGatheringRules"
+// listGatheringRulesV1 populates the table with all the gathering rules in the API
+func listGatheringRulesV1(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	const functionName = "listGatheringRulesV1"
 	client, err := connect(ctx, d)
 	if err != nil {
 		pluginLogError(ctx, openshiftInsightsGCSV1GatheringRules, functionName, "client_error", err)
@@ -75,7 +74,7 @@ func listGatheringRules(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	}
 	defer resp.Body.Close()
 
-	rules, err := decodeGatheringRules(resp.Body)
+	rules, err := decodeGatheringRulesV1(resp.Body)
 	if err != nil {
 		pluginLogError(ctx, openshiftInsightsGCSV1GatheringRules, functionName, "decode_error", err)
 		return nil, err
@@ -92,8 +91,8 @@ func listGatheringRules(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	return nil, nil
 }
 
-func decodeGatheringRules(body io.ReadCloser) (gatheringRules, error) {
-	var rules gatheringRules
+func decodeGatheringRulesV1(body io.ReadCloser) (gatheringRulesV1, error) {
+	var rules gatheringRulesV1
 	err := json.NewDecoder(body).Decode(&rules)
 	return rules, err
 }
