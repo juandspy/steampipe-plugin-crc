@@ -45,7 +45,7 @@ Try it!
 ```
 steampipe query
 > .inspect crc
-> 
+> SELECT version, conditions, gathering_functions FROM crc.openshift_insights_gcs_v1_gathering_rules;
 ```
 
 You can check the plugin and steampipe logs using
