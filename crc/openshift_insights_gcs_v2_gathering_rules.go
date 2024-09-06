@@ -92,6 +92,12 @@ func getGatheringRulesV2(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != 200 {
+		err = errors.New(resp.Status)
+		pluginLogError(ctx, openshiftInsightsGCSV2RemoteConfiguration, functionName, "api_error", err)
+		return nil, err
+	}
+
 	rules, err := decodeGatheringRulesV2(resp.Body)
 	if err != nil {
 		pluginLogError(ctx, openshiftInsightsGCSV2RemoteConfiguration, functionName, "decode_error", err)

@@ -9,6 +9,8 @@ Get involved: // TODO: link to issues
 
 ##  Quick start
 
+// TODO
+
 ## Developing
 
 Prerequisites:
@@ -55,3 +57,45 @@ Further reading:
 
 - [Writing plugins](https://steampipe.io/docs/develop/writing-plugins)
 - [Writing your first table](https://steampipe.io/docs/develop/writing-your-first-table)
+
+## Examples
+
+### openshift_insights_gcs_v1_gathering_rules
+
+```sql
+SELECT version, conditions, gathering_functions
+FROM crc.openshift_insights_gcs_v1_gathering_rules;
+```
+
+### openshift_insights_gcs_v2_gathering_rules
+
+#### Get the gathering rules for a valid version
+
+```sql
+
+SELECT version, conditional_gathering_rules, container_logs
+FROM crc.openshift_insights_gcs_v2_gathering_rules
+WHERE ocp_version = '4.17.0';
+```
+
+#### Get the gathering rules for a version that is not available
+
+```sql
+
+SELECT version, conditional_gathering_rules, container_logs
+FROM crc.openshift_insights_gcs_v2_gathering_rules
+WHERE ocp_version = '3.0.0';
+```
+
+This will print a 404 error.
+
+#### Get the gathering rules for wrong version
+
+```sql
+
+SELECT version, conditional_gathering_rules, container_logs
+FROM crc.openshift_insights_gcs_v2_gathering_rules
+WHERE ocp_version = 'foo';
+```
+
+This will print a 400 error.
