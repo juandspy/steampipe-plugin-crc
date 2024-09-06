@@ -60,6 +60,29 @@ Further reading:
 
 ## Examples
 
+### openshift_insights_aggregator_v2_clusters
+
+The queries involving this table takes some time because the API endpoint is quite slow.
+
+#### List your clusters
+
+```sql
+SELECT
+    cluster_id, cluster_name, cluster_version, managed, last_checked_at,
+    total_hit_count, hits_by_total_risk
+FROM crc.openshift_insights_aggregator_v2_clusters
+```
+
+#### Find problematic clusters
+
+```sql
+SELECT
+    cluster_id, cluster_name, cluster_version, managed, last_checked_at,
+    total_hit_count, hits_by_total_risk
+FROM crc.openshift_insights_aggregator_v2_clusters
+WHERE total_hit_count > 4
+```
+
 ### openshift_insights_gcs_v1_gathering_rules
 
 ```sql

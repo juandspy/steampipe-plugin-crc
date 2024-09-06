@@ -71,7 +71,7 @@ func getGatheringRulesV2(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 		return nil, err
 	}
 
-	client, err := connect(ctx, d)
+	client, err := connect(ctx, d, defaultTimeout)
 	if err != nil {
 		pluginLogError(ctx, openshiftInsightsGCSV2RemoteConfiguration, functionName, "client_error", err)
 		return nil, err

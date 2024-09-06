@@ -97,15 +97,15 @@ func (c *SSOClient) authenticate() error {
 }
 
 // newAuthenticatedClient returns an HTTP client with SSO authentication
-func newAuthenticatedClient(clientID, clientSecret, tokenURL string) *http.Client {
+func newAuthenticatedClient(clientID, clientSecret, tokenURL string, timeout time.Duration) *http.Client {
 	ssoClient := NewSSOClient(clientID, clientSecret, tokenURL)
 	return &http.Client{
 		Transport: ssoClient,
-		Timeout:   defaultTimeout,
+		Timeout:   timeout,
 	}
 }
 
-func connect(_ context.Context, d *plugin.QueryData) (*http.Client, error) {
+func connect(_ context.Context, d *plugin.QueryData, timeout time.Duration) (*http.Client, error) {
 	// Load connection from cache, which preserves throttling protection etc
 	cacheKey := "crc"
 	if cachedData, ok := d.ConnectionManager.Cache.Get(cacheKey); ok {
@@ -147,7 +147,7 @@ func connect(_ context.Context, d *plugin.QueryData) (*http.Client, error) {
 		return nil, errors.New("'client_secret' must be set in the connection configuration")
 	}
 
-	client := newAuthenticatedClient(clientID, clientSecret, tokenURL)
+	client := newAuthenticatedClient(clientID, clientSecret, tokenURL, timeout)
 
 	// Save to cache
 	d.ConnectionManager.Cache.Set(cacheKey, client)

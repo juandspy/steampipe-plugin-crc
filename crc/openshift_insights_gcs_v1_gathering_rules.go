@@ -54,7 +54,7 @@ func tableInsightsGatheringRulesV1(_ context.Context) *plugin.Table {
 // listGatheringRulesV1 populates the table with all the gathering rules in the API
 func listGatheringRulesV1(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	const functionName = "listGatheringRulesV1"
-	client, err := connect(ctx, d)
+	client, err := connect(ctx, d, defaultTimeout)
 	if err != nil {
 		pluginLogError(ctx, openshiftInsightsGCSV1GatheringRules, functionName, "client_error", err)
 		return nil, err
