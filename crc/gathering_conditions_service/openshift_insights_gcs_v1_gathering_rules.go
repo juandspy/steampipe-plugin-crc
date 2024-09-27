@@ -1,4 +1,4 @@
-package crc
+package gathering_conditions_service
 
 import (
 	"context"
@@ -6,12 +6,13 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/juandspy/steampipe-plugin-crc/crc/utils"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
-const openshiftInsightsGCSV1GatheringRules = "openshift_insights_gcs_v1_gathering_rules"
+const V1GatheringRules = "openshift_insights_gcs_v1_gathering_rules"
 
 type gatheringRulesV1 struct {
 	Version string `json:"version"`
@@ -21,9 +22,9 @@ type gatheringRulesV1 struct {
 	} `json:"rules"`
 }
 
-func tableInsightsGatheringRulesV1(_ context.Context) *plugin.Table {
+func TableGatheringRulesV1(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        openshiftInsightsGCSV1GatheringRules,
+		Name:        V1GatheringRules,
 		Description: "Return a list of versioned gathering rules.",
 		List: &plugin.ListConfig{
 			Hydrate: listGatheringRulesV1,
@@ -54,29 +55,29 @@ func tableInsightsGatheringRulesV1(_ context.Context) *plugin.Table {
 // listGatheringRulesV1 populates the table with all the gathering rules in the API
 func listGatheringRulesV1(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	const functionName = "listGatheringRulesV1"
-	client, err := connect(ctx, d, defaultTimeout)
+	client, err := utils.GetConsoleDotClient(ctx, d, utils.DefaultTimeout)
 	if err != nil {
-		pluginLogError(ctx, openshiftInsightsGCSV1GatheringRules, functionName, "client_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1GatheringRules, functionName, "client_error", err)
 		return nil, err
 	}
 
 	url := "https://console.redhat.com/api/gathering/v1/gathering_rules"
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		pluginLogError(ctx, openshiftInsightsGCSV1GatheringRules, functionName, "request_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1GatheringRules, functionName, "request_error", err)
 		return nil, err
 	}
 
 	resp, err := client.Do(req)
 	if err != nil {
-		pluginLogError(ctx, openshiftInsightsGCSV1GatheringRules, functionName, "api_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1GatheringRules, functionName, "api_error", err)
 		return nil, err
 	}
 	defer resp.Body.Close()
 
 	rules, err := decodeGatheringRulesV1(resp.Body)
 	if err != nil {
-		pluginLogError(ctx, openshiftInsightsGCSV1GatheringRules, functionName, "decode_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1GatheringRules, functionName, "decode_error", err)
 		return nil, err
 	}
 

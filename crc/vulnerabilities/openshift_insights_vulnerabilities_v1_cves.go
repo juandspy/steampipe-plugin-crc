@@ -1,4 +1,4 @@
-package crc
+package vulnerabilities
 
 import (
 	"context"
@@ -6,12 +6,13 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/juandspy/steampipe-plugin-crc/crc/utils"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
-const openshiftInsightsVulnerabilitiesV1CVEs = "openshift_insights_vulnerabilities_v1_cves"
+const V1CVEsTableName = "openshift_insights_vulnerabilities_v1_cves"
 
 type vulnerabilitiesV1CVEsResponse struct {
 	Data []struct {
@@ -28,9 +29,9 @@ type vulnerabilitiesV1CVEsResponse struct {
 	Meta struct{} `json:"meta"`
 }
 
-func tableVulnerabilitiesCVEsV1(_ context.Context) *plugin.Table {
+func TableCVEsV1(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        openshiftInsightsVulnerabilitiesV1CVEs,
+		Name:        V1CVEsTableName,
 		Description: "Retrieves CVEs affecting the current workload.",
 		List: &plugin.ListConfig{
 			Hydrate: listVulnerabilitiesCVEsV1,
@@ -97,36 +98,36 @@ func tableVulnerabilitiesCVEsV1(_ context.Context) *plugin.Table {
 func listVulnerabilitiesCVEsV1(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	// TODO: add pagination, sorting, filtering and so on.
 	const functionName = "listVulnerabilitiesCVEsV1"
-	client, err := connect(ctx, d, defaultTimeout)
+	client, err := utils.GetConsoleDotClient(ctx, d, utils.DefaultTimeout)
 	if err != nil {
-		pluginLogError(ctx, openshiftInsightsVulnerabilitiesV1CVEs, functionName, "client_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1CVEsTableName, functionName, "client_error", err)
 		return nil, err
 	}
 
 	url := "https://console.redhat.com/api/ocp-vulnerability/v1/cves"
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		pluginLogError(ctx, openshiftInsightsVulnerabilitiesV1CVEs, functionName, "request_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1CVEsTableName, functionName, "request_error", err)
 		return nil, err
 	}
 
 	resp, err := client.Do(req)
 	if err != nil {
-		pluginLogError(ctx, openshiftInsightsVulnerabilitiesV1CVEs, functionName, "api_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1CVEsTableName, functionName, "api_error", err)
 		return nil, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
 		err = fmt.Errorf("API request failed with status code %d", resp.StatusCode)
-		pluginLogError(ctx, openshiftInsightsVulnerabilitiesV1CVEs, functionName, "api_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1CVEsTableName, functionName, "api_error", err)
 		return nil, err
 	}
 
 	var cveResponse vulnerabilitiesV1CVEsResponse
 	err = json.NewDecoder(resp.Body).Decode(&cveResponse)
 	if err != nil {
-		pluginLogError(ctx, openshiftInsightsVulnerabilitiesV1CVEs, functionName, "decode_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1CVEsTableName, functionName, "decode_error", err)
 		return nil, err
 	}
 

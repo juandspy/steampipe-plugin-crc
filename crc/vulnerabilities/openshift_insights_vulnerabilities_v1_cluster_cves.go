@@ -1,4 +1,4 @@
-package crc
+package vulnerabilities
 
 import (
 	"context"
@@ -8,12 +8,13 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/juandspy/steampipe-plugin-crc/crc/utils"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
-const openshiftInsightsVulnerabilitiesV1ClusterCVEs = "openshift_insights_vulnerabilities_v1_cluster_cves"
+const V1ClusterCVEsTableName = "openshift_insights_vulnerabilities_v1_cluster_cves"
 
 type vulnerabilitiesV1ClusterCVEsResponse struct {
 	Data []struct {
@@ -28,9 +29,9 @@ type vulnerabilitiesV1ClusterCVEsResponse struct {
 	Meta struct{} `json:"meta"`
 }
 
-func tableVulnerabilitiesClusterCVEsV1(_ context.Context) *plugin.Table {
+func TableClusterCVEsV1(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        openshiftInsightsVulnerabilitiesV1ClusterCVEs,
+		Name:        V1ClusterCVEsTableName,
 		Description: "Retrieves CVE details for a specific Cluster ID.",
 		List: &plugin.ListConfig{
 			Hydrate:    getVulnerabilitiesClusterCVEsV1,
@@ -96,12 +97,12 @@ func getVulnerabilitiesClusterCVEsV1(ctx context.Context, d *plugin.QueryData, h
 
 	if clusterID == "" {
 		err := errors.New("you must specify a Cluster ID")
-		pluginLogError(ctx, openshiftInsightsVulnerabilitiesV1ClusterCVEs, functionName, "query_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1ClusterCVEsTableName, functionName, "query_error", err)
 		return nil, err
 	}
-	client, err := connect(ctx, d, defaultTimeout)
+	client, err := utils.GetConsoleDotClient(ctx, d, utils.DefaultTimeout)
 	if err != nil {
-		pluginLogError(ctx, openshiftInsightsVulnerabilitiesV1ClusterCVEs, functionName, "client_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1ClusterCVEsTableName, functionName, "client_error", err)
 		return nil, err
 	}
 
@@ -109,26 +110,26 @@ func getVulnerabilitiesClusterCVEsV1(ctx context.Context, d *plugin.QueryData, h
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		pluginLogError(ctx, openshiftInsightsVulnerabilitiesV1ClusterCVEs, functionName, "request_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1ClusterCVEsTableName, functionName, "request_error", err)
 		return nil, err
 	}
 
 	resp, err := client.Do(req)
 	if err != nil {
-		pluginLogError(ctx, openshiftInsightsVulnerabilitiesV1ClusterCVEs, functionName, "api_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1ClusterCVEsTableName, functionName, "api_error", err)
 		return nil, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
 		err = fmt.Errorf("API request failed with status code %d", resp.StatusCode)
-		pluginLogError(ctx, openshiftInsightsVulnerabilitiesV1ClusterCVEs, functionName, "api_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1ClusterCVEsTableName, functionName, "api_error", err)
 		return nil, err
 	}
 
 	cveResponse, err := decodeVulnerabilitiesClusterCVEsV1Response(resp.Body)
 	if err != nil {
-		pluginLogError(ctx, openshiftInsightsVulnerabilitiesV1ClusterCVEs, functionName, "decode_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1ClusterCVEsTableName, functionName, "decode_error", err)
 		return nil, err
 	}
 

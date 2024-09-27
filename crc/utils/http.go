@@ -1,4 +1,4 @@
-package crc
+package utils
 
 import (
 	"bytes"
@@ -16,7 +16,7 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 )
 
-var defaultTimeout = 20 * time.Second
+const DefaultTimeout = 20 * time.Second
 
 // SSOClient struct to hold SSO credentials and token
 type SSOClient struct {
@@ -105,7 +105,8 @@ func newAuthenticatedClient(clientID, clientSecret, tokenURL string, timeout tim
 	}
 }
 
-func connect(_ context.Context, d *plugin.QueryData, timeout time.Duration) (*http.Client, error) {
+// GetConsoleDotClient returns an HTTP client with SSO authentication for the console.redhat.com APIs
+func GetConsoleDotClient(_ context.Context, d *plugin.QueryData, timeout time.Duration) (*http.Client, error) {
 	// Load connection from cache, which preserves throttling protection etc
 	cacheKey := "crc"
 	if cachedData, ok := d.ConnectionManager.Cache.Get(cacheKey); ok {

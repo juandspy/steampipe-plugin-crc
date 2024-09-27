@@ -1,4 +1,4 @@
-package crc
+package vulnerabilities
 
 import (
 	"context"
@@ -7,12 +7,13 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/juandspy/steampipe-plugin-crc/crc/utils"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
-const openshiftInsightsVulnerabilitiesV1CVEsExposedImages = "openshift_insights_vulnerabilities_v1_cves_exposed_images"
+const V1CVEsExposedImagesTableName = "openshift_insights_vulnerabilities_v1_cves_exposed_images"
 
 type vulnerabilitiesV1CVEsExposedImagesResponse struct {
 	Data []struct {
@@ -24,9 +25,9 @@ type vulnerabilitiesV1CVEsExposedImagesResponse struct {
 	Meta struct{} `json:"meta"`
 }
 
-func tableVulnerabilitiesCVEsExposedImagesV1(_ context.Context) *plugin.Table {
+func TableCVEsExposedImagesV1(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        openshiftInsightsVulnerabilitiesV1CVEsExposedImages,
+		Name:        V1CVEsExposedImagesTableName,
 		Description: "Retrieves exposed images for a specific CVE.",
 		List: &plugin.ListConfig{
 			Hydrate:    getVulnerabilitiesCVEsExposedImagesV1,
@@ -70,13 +71,13 @@ func getVulnerabilitiesCVEsExposedImagesV1(ctx context.Context, d *plugin.QueryD
 
 	if cveName == "" {
 		err := errors.New("you must specify a CVE name")
-		pluginLogError(ctx, openshiftInsightsVulnerabilitiesV1CVEsExposedImages, functionName, "query_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1CVEsExposedImagesTableName, functionName, "query_error", err)
 		return nil, err
 	}
 
-	client, err := connect(ctx, d, defaultTimeout)
+	client, err := utils.GetConsoleDotClient(ctx, d, utils.DefaultTimeout)
 	if err != nil {
-		pluginLogError(ctx, openshiftInsightsVulnerabilitiesV1CVEsExposedImages, functionName, "client_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1CVEsExposedImagesTableName, functionName, "client_error", err)
 		return nil, err
 	}
 
@@ -84,27 +85,27 @@ func getVulnerabilitiesCVEsExposedImagesV1(ctx context.Context, d *plugin.QueryD
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		pluginLogError(ctx, openshiftInsightsVulnerabilitiesV1CVEsExposedImages, functionName, "request_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1CVEsExposedImagesTableName, functionName, "request_error", err)
 		return nil, err
 	}
 
 	resp, err := client.Do(req)
 	if err != nil {
-		pluginLogError(ctx, openshiftInsightsVulnerabilitiesV1CVEsExposedImages, functionName, "api_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1CVEsExposedImagesTableName, functionName, "api_error", err)
 		return nil, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
 		err = fmt.Errorf("API request failed with status code %d", resp.StatusCode)
-		pluginLogError(ctx, openshiftInsightsVulnerabilitiesV1CVEsExposedImages, functionName, "api_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1CVEsExposedImagesTableName, functionName, "api_error", err)
 		return nil, err
 	}
 
 	var exposedImagesResponse vulnerabilitiesV1CVEsExposedImagesResponse
 	err = json.NewDecoder(resp.Body).Decode(&exposedImagesResponse)
 	if err != nil {
-		pluginLogError(ctx, openshiftInsightsVulnerabilitiesV1CVEsExposedImages, functionName, "decode_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1CVEsExposedImagesTableName, functionName, "decode_error", err)
 		return nil, err
 	}
 

@@ -1,4 +1,4 @@
-package crc
+package gathering_conditions_service
 
 import (
 	"context"
@@ -8,12 +8,13 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/juandspy/steampipe-plugin-crc/crc/utils"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
-const openshiftInsightsGCSV2RemoteConfiguration = "openshift_insights_gcs_v2_gathering_rules"
+const V2RemoteConfiguration = "openshift_insights_gcs_v2_gathering_rules"
 
 type gatheringRulesV2 struct {
 	Version                   string        `json:"version,omitempty"`
@@ -21,9 +22,9 @@ type gatheringRulesV2 struct {
 	ContainerLogs             interface{}   `json:"container_logs,omitempty"`
 }
 
-func tableInsightsGatheringRulesV2(_ context.Context) *plugin.Table {
+func TableGatheringRulesV2(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        openshiftInsightsGCSV2RemoteConfiguration,
+		Name:        V2RemoteConfiguration,
 		Description: "Return the gathering rules for a given OCP version.",
 		Get: &plugin.GetConfig{
 			Hydrate:    getGatheringRulesV2,
@@ -67,13 +68,13 @@ func getGatheringRulesV2(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 
 	if ocpVersion == "" {
 		err := errors.New("you must specify an OCP version")
-		pluginLogError(ctx, openshiftInsightsGCSV2RemoteConfiguration, functionName, "query_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V2RemoteConfiguration, functionName, "query_error", err)
 		return nil, err
 	}
 
-	client, err := connect(ctx, d, defaultTimeout)
+	client, err := utils.GetConsoleDotClient(ctx, d, utils.DefaultTimeout)
 	if err != nil {
-		pluginLogError(ctx, openshiftInsightsGCSV2RemoteConfiguration, functionName, "client_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V2RemoteConfiguration, functionName, "client_error", err)
 		return nil, err
 	}
 
@@ -81,26 +82,26 @@ func getGatheringRulesV2(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		pluginLogError(ctx, openshiftInsightsGCSV2RemoteConfiguration, functionName, "request_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V2RemoteConfiguration, functionName, "request_error", err)
 		return nil, err
 	}
 
 	resp, err := client.Do(req)
 	if err != nil {
-		pluginLogError(ctx, openshiftInsightsGCSV2RemoteConfiguration, functionName, "api_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V2RemoteConfiguration, functionName, "api_error", err)
 		return nil, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
 		err = errors.New(resp.Status)
-		pluginLogError(ctx, openshiftInsightsGCSV2RemoteConfiguration, functionName, "api_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V2RemoteConfiguration, functionName, "api_error", err)
 		return nil, err
 	}
 
 	rules, err := decodeGatheringRulesV2(resp.Body)
 	if err != nil {
-		pluginLogError(ctx, openshiftInsightsGCSV2RemoteConfiguration, functionName, "decode_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V2RemoteConfiguration, functionName, "decode_error", err)
 		return nil, err
 	}
 

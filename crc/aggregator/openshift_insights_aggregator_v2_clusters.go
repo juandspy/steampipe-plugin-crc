@@ -1,4 +1,4 @@
-package crc
+package aggregator
 
 import (
 	"context"
@@ -8,12 +8,13 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/juandspy/steampipe-plugin-crc/crc/utils"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
-const openshiftInsightsAggregatorV2Clusters = "openshift_insights_aggregator_v2_clusters"
+const V2Clusters = "openshift_insights_aggregator_v2_clusters"
 
 type ClustersResponseV2 struct {
 	Data []struct {
@@ -36,9 +37,9 @@ type ClustersResponseV2 struct {
 	Status string `json:"status"`
 }
 
-func tableAggregatorClustersV2(_ context.Context) *plugin.Table {
+func TableClustersV2(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        openshiftInsightsAggregatorV2Clusters,
+		Name:        V2Clusters,
 		Description: "Retrieves all clusters for given organization, retrieves the impacting rules for each cluster and calculates the count of impacting rules by total risk (severity == critical, high, moderate, low).",
 		List: &plugin.ListConfig{
 			Hydrate: listClustersV2,
@@ -93,22 +94,22 @@ func tableAggregatorClustersV2(_ context.Context) *plugin.Table {
 func listClustersV2(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	const functionName = "listClustersV2"
 	timeout := 60 * time.Second // this API endpoint is very slow
-	client, err := connect(ctx, d, timeout)
+	client, err := utils.GetConsoleDotClient(ctx, d, timeout)
 	if err != nil {
-		pluginLogError(ctx, openshiftInsightsAggregatorV2Clusters, functionName, "client_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V2Clusters, functionName, "client_error", err)
 		return nil, err
 	}
 
 	url := "https://console.redhat.com/api/insights-results-aggregator/v2/clusters"
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		pluginLogError(ctx, openshiftInsightsAggregatorV2Clusters, functionName, "request_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V2Clusters, functionName, "request_error", err)
 		return nil, err
 	}
 
 	resp, err := client.Do(req)
 	if err != nil {
-		pluginLogError(ctx, openshiftInsightsAggregatorV2Clusters, functionName, "api_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V2Clusters, functionName, "api_error", err)
 		return nil, err
 	}
 
@@ -116,13 +117,13 @@ func listClustersV2(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 
 	clusterResponse, err := decodeClustersV2(resp.Body)
 	if err != nil {
-		pluginLogError(ctx, openshiftInsightsAggregatorV2Clusters, functionName, "decode_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V2Clusters, functionName, "decode_error", err)
 		return nil, err
 	}
 
 	if resp.StatusCode != 200 {
 		err = errors.New(clusterResponse.Status)
-		pluginLogError(ctx, openshiftInsightsAggregatorV2Clusters, functionName, "api_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V2Clusters, functionName, "api_error", err)
 		return nil, err
 	}
 
