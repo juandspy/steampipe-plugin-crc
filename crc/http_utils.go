@@ -16,7 +16,7 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 )
 
-var defaultTimeout = 10 * time.Second
+var defaultTimeout = 20 * time.Second
 
 // SSOClient struct to hold SSO credentials and token
 type SSOClient struct {

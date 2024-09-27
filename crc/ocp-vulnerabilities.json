@@ -1,0 +1,1514 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+        "title": "Vulnerability for Openshift API documentation",
+        "description": "Documentation to the REST API for application\nVulnerability for Openshift based on console.redhat.com.",
+        "contact": {},
+        "version": "0.35.6"
+    },
+    "servers": [
+        {
+            "url": "/api/ocp-vulnerability/v1"
+        }
+    ],
+    "paths": {
+        "/clusters": {
+            "get": {
+                "tags": [
+                    "clusters"
+                ],
+                "summary": "List of Clusters",
+                "description": "Endpoint returning Clusters",
+                "operationId": "GetClusters",
+                "parameters": [
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "column for sort",
+                        "style": "form",
+                        "explode": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "cluster search",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "limit per page",
+                        "schema": {
+                            "maximum": 100,
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "page offset",
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "data_format",
+                        "in": "query",
+                        "description": "data section format",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "json",
+                                "csv"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "report",
+                        "in": "query",
+                        "description": "overrides limit and offset to return everything",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "provider",
+                        "in": "query",
+                        "description": "provider of the cluster",
+                        "style": "form",
+                        "explode": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "status of the cluster",
+                        "style": "form",
+                        "explode": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "name": "version",
+                        "in": "query",
+                        "description": "version of the cluster",
+                        "style": "form",
+                        "explode": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "name": "cluster_severity",
+                        "in": "query",
+                        "description": "array of severity names",
+                        "style": "form",
+                        "explode": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "Low",
+                                    "Moderate",
+                                    "Important",
+                                    "Critical"
+                                ]
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/clusters.GetClustersResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/base.Error"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/base.Error"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BasicAuth": [],
+                        "RhIdentity": []
+                    }
+                ]
+            }
+        },
+        "/clusters/{cluster_id}": {
+            "get": {
+                "tags": [
+                    "clusters"
+                ],
+                "summary": "Cluster details",
+                "description": "Endpoint returning details of the given single cluster",
+                "operationId": "GetClusterDetails",
+                "parameters": [
+                    {
+                        "name": "cluster_id",
+                        "in": "path",
+                        "description": "cluster ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/clusters.GetClusterDetailsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/base.Error"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "cluster does not exist",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/base.Error"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/base.Error"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BasicAuth": [],
+                        "RhIdentity": []
+                    }
+                ]
+            }
+        },
+        "/clusters/{cluster_id}/cves": {
+            "get": {
+                "tags": [
+                    "clusters"
+                ],
+                "summary": "List of CVEs affecting/nonaffecting single cluster",
+                "description": "Endpoint returning CVEs affecting/nonaffecting the given single cluster",
+                "operationId": "GetClusterCves",
+                "parameters": [
+                    {
+                        "name": "cluster_id",
+                        "in": "path",
+                        "description": "cluster ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "column for sort",
+                        "style": "form",
+                        "explode": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "cve name/desc search",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "limit per page",
+                        "schema": {
+                            "maximum": 100,
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "page offset",
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "data_format",
+                        "in": "query",
+                        "description": "data section format",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "json",
+                                "csv"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "report",
+                        "in": "query",
+                        "description": "overrides limit and offset to return everything",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "published",
+                        "in": "query",
+                        "description": "CVE publish date: (from date),(to date)",
+                        "style": "form",
+                        "explode": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "name": "severity",
+                        "in": "query",
+                        "description": "array of severity names",
+                        "style": "form",
+                        "explode": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "NotSet",
+                                    "None",
+                                    "Low",
+                                    "Medium",
+                                    "Moderate",
+                                    "Important",
+                                    "High",
+                                    "Critical"
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "name": "cvss_score",
+                        "in": "query",
+                        "description": "CVSS score of CVE: (from float),(to float)",
+                        "style": "form",
+                        "explode": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "number"
+                            }
+                        }
+                    },
+                    {
+                        "name": "exploits",
+                        "in": "query",
+                        "description": "boolean for known exploits",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/clusters.GetClusterCvesResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/base.Error"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "cluster does not exist",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/base.Error"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/base.Error"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BasicAuth": [],
+                        "RhIdentity": []
+                    }
+                ]
+            }
+        },
+        "/clusters/{cluster_id}/exposed_images": {
+            "get": {
+                "tags": [
+                    "clusters"
+                ],
+                "summary": "List of images affecting single cluster",
+                "description": "Endpoint returning images affecting the given single cluster",
+                "operationId": "GetClusterImages",
+                "parameters": [
+                    {
+                        "name": "cluster_id",
+                        "in": "path",
+                        "description": "cluster ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "column for sort",
+                        "style": "form",
+                        "explode": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "image name/registry search",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "limit per page",
+                        "schema": {
+                            "maximum": 100,
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "page offset",
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "data_format",
+                        "in": "query",
+                        "description": "data section format",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "json",
+                                "csv"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "report",
+                        "in": "query",
+                        "description": "overrides limit and offset to return everything",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/clusters.GetClusterImagesResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/base.Error"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "cluster does not exist",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/base.Error"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/base.Error"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BasicAuth": [],
+                        "RhIdentity": []
+                    }
+                ]
+            }
+        },
+        "/cves": {
+            "get": {
+                "tags": [
+                    "cves"
+                ],
+                "summary": "List of CVEs affecting the workload",
+                "description": "Endpoint returning CVEs affecting the current workload",
+                "operationId": "GetCves",
+                "parameters": [
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "column for sort",
+                        "style": "form",
+                        "explode": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "cve name/desc search",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "limit per page",
+                        "schema": {
+                            "maximum": 100,
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "page offset",
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "data_format",
+                        "in": "query",
+                        "description": "data section format",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "json",
+                                "csv"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "report",
+                        "in": "query",
+                        "description": "overrides limit and offset to return everything",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "published",
+                        "in": "query",
+                        "description": "CVE publish date: (from date),(to date)",
+                        "style": "form",
+                        "explode": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "name": "severity",
+                        "in": "query",
+                        "description": "array of severity names",
+                        "style": "form",
+                        "explode": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "NotSet",
+                                    "None",
+                                    "Low",
+                                    "Medium",
+                                    "Moderate",
+                                    "Important",
+                                    "High",
+                                    "Critical"
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "name": "cvss_score",
+                        "in": "query",
+                        "description": "CVSS score of CVE: (from float),(to float)",
+                        "style": "form",
+                        "explode": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "number"
+                            }
+                        }
+                    },
+                    {
+                        "name": "affected_clusters",
+                        "in": "query",
+                        "description": "checkbox bool array: (1 or more),(0)",
+                        "style": "form",
+                        "explode": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "boolean"
+                            }
+                        }
+                    },
+                    {
+                        "name": "exploits",
+                        "in": "query",
+                        "description": "boolean for known exploits",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/cves.GetCvesResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/base.Error"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BasicAuth": [],
+                        "RhIdentity": []
+                    }
+                ]
+            }
+        },
+        "/cves/{cve_name}": {
+            "get": {
+                "tags": [
+                    "cves"
+                ],
+                "summary": "CVE details",
+                "description": "Endpoint return details for given CVE",
+                "operationId": "GetCveDetails",
+                "parameters": [
+                    {
+                        "name": "cve_name",
+                        "in": "path",
+                        "description": "CVE name",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/cves.GetCveDetailsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "{cve_name} not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/base.Error"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/base.Error"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BasicAuth": [],
+                        "RhIdentity": []
+                    }
+                ]
+            }
+        },
+        "/cves/{cve_name}/exposed_clusters": {
+            "get": {
+                "tags": [
+                    "cves"
+                ],
+                "summary": "List of exposed clusters for CVE",
+                "description": "Endpoint return exposed clusters for given CVE",
+                "operationId": "GetExposedClusters",
+                "parameters": [
+                    {
+                        "name": "cve_name",
+                        "in": "path",
+                        "description": "CVE name",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "column for sort",
+                        "style": "form",
+                        "explode": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "cluster search",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "limit per page",
+                        "schema": {
+                            "maximum": 100,
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "page offset",
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "data_format",
+                        "in": "query",
+                        "description": "data section format",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "json",
+                                "csv"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "report",
+                        "in": "query",
+                        "description": "overrides limit and offset to return everything",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/cves.GetExposedClustersResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/base.Error"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "{cve_name} not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/base.Error"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/base.Error"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BasicAuth": [],
+                        "RhIdentity": []
+                    }
+                ]
+            }
+        },
+        "/cves/{cve_name}/exposed_clusters_count": {
+            "get": {
+                "tags": [
+                    "cves"
+                ],
+                "summary": "Quantity of exposed clusters for a CVE",
+                "description": "Endpoint returns the number of exposed clusters for a given CVE",
+                "operationId": "GetExposedClustersCount",
+                "parameters": [
+                    {
+                        "name": "cve_name",
+                        "in": "path",
+                        "description": "CVE name",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/cves.GetExposedClustersCountResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/base.Error"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "{cve_name} not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/base.Error"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/base.Error"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BasicAuth": [],
+                        "RhIdentity": []
+                    }
+                ]
+            }
+        },
+        "/cves/{cve_name}/exposed_images": {
+            "get": {
+                "tags": [
+                    "cves"
+                ],
+                "summary": "List of images affecting single cve",
+                "description": "Endpoint returning images affecting the given single cluster",
+                "operationId": "GetCveImages",
+                "parameters": [
+                    {
+                        "name": "cve_name",
+                        "in": "path",
+                        "description": "cve ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "column for sort",
+                        "style": "form",
+                        "explode": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "image name/registry search",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "limit per page",
+                        "schema": {
+                            "maximum": 100,
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "page offset",
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "data_format",
+                        "in": "query",
+                        "description": "data section format",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "json",
+                                "csv"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "report",
+                        "in": "query",
+                        "description": "overrides limit and offset to return everything",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/cves.GetCveImagesResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/base.Error"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "cve does not exist",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/base.Error"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/base.Error"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BasicAuth": [],
+                        "RhIdentity": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "base.Error": {
+                "type": "object",
+                "properties": {
+                    "error": {
+                        "$ref": "#/components/schemas/base.ErrorDetail"
+                    }
+                }
+            },
+            "base.ErrorDetail": {
+                "type": "object",
+                "properties": {
+                    "detail": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "integer"
+                    }
+                }
+            },
+            "clusters.ClusterCveSeverities": {
+                "type": "object",
+                "properties": {
+                    "critical": {
+                        "type": "integer"
+                    },
+                    "important": {
+                        "type": "integer"
+                    },
+                    "low": {
+                        "type": "integer"
+                    },
+                    "moderate": {
+                        "type": "integer"
+                    }
+                }
+            },
+            "clusters.GetClusterCvesResponse": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/clusters.GetClusterCvesSelect"
+                        }
+                    },
+                    "meta": {
+                        "type": "object"
+                    }
+                }
+            },
+            "clusters.GetClusterCvesSelect": {
+                "type": "object",
+                "properties": {
+                    "cvss2_score": {
+                        "type": "number"
+                    },
+                    "cvss3_score": {
+                        "type": "number"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "exploits": {
+                        "type": "boolean"
+                    },
+                    "publish_date": {
+                        "type": "string"
+                    },
+                    "severity": {
+                        "$ref": "#/components/schemas/models.Severity"
+                    },
+                    "synopsis": {
+                        "type": "string"
+                    }
+                },
+                "description": "CVE in cluster data presents in response"
+            },
+            "clusters.GetClusterDetailsResponse": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "$ref": "#/components/schemas/clusters.GetClusterDetailsSelect"
+                    },
+                    "meta": {
+                        "type": "object"
+                    }
+                }
+            },
+            "clusters.GetClusterDetailsSelect": {
+                "type": "object",
+                "properties": {
+                    "display_name": {
+                        "type": "string"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "last_seen": {
+                        "type": "string"
+                    }
+                },
+                "description": "Cluster details presents in response"
+            },
+            "clusters.GetClusterImagesResponse": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/clusters.GetClusterImagesSelect"
+                        }
+                    },
+                    "meta": {
+                        "type": "object"
+                    }
+                }
+            },
+            "clusters.GetClusterImagesSelect": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "registry": {
+                        "type": "string"
+                    },
+                    "version": {
+                        "type": "string"
+                    }
+                },
+                "description": "Exposed images in cluster data presents in response"
+            },
+            "clusters.GetClustersResponse": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/clusters.GetClustersSelect"
+                        }
+                    },
+                    "meta": {
+                        "type": "object"
+                    }
+                }
+            },
+            "clusters.GetClustersSelect": {
+                "type": "object",
+                "properties": {
+                    "cves_severity": {
+                        "$ref": "#/components/schemas/clusters.ClusterCveSeverities"
+                    },
+                    "display_name": {
+                        "type": "string"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "last_seen": {
+                        "type": "string"
+                    },
+                    "provider": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string"
+                    },
+                    "version": {
+                        "type": "string"
+                    }
+                },
+                "description": "clusters data"
+            },
+            "cves.GetCveDetailsResponse": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "$ref": "#/components/schemas/cves.GetCveDetailsSelect"
+                    },
+                    "meta": {
+                        "type": "object"
+                    }
+                }
+            },
+            "cves.GetCveDetailsSelect": {
+                "type": "object",
+                "properties": {
+                    "cvss2_metrics": {
+                        "type": "string"
+                    },
+                    "cvss2_score": {
+                        "type": "number"
+                    },
+                    "cvss3_metrics": {
+                        "type": "string"
+                    },
+                    "cvss3_score": {
+                        "type": "number"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "exploits": {
+                        "type": "boolean"
+                    },
+                    "publish_date": {
+                        "type": "string"
+                    },
+                    "redhat_url": {
+                        "type": "string"
+                    },
+                    "severity": {
+                        "$ref": "#/components/schemas/models.Severity"
+                    },
+                    "synopsis": {
+                        "type": "string"
+                    }
+                },
+                "description": "CVE details data presents in response"
+            },
+            "cves.GetCveImagesResponse": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/cves.GetCveImagesSelect"
+                        }
+                    },
+                    "meta": {
+                        "type": "object"
+                    }
+                }
+            },
+            "cves.GetCveImagesSelect": {
+                "type": "object",
+                "properties": {
+                    "clusters_exposed": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "registry": {
+                        "type": "string"
+                    },
+                    "version": {
+                        "type": "string"
+                    }
+                },
+                "description": "Exposed images in cve data presents in response"
+            },
+            "cves.GetCvesResponse": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/cves.GetCvesSelect"
+                        }
+                    },
+                    "meta": {
+                        "type": "object"
+                    }
+                }
+            },
+            "cves.GetCvesSelect": {
+                "type": "object",
+                "properties": {
+                    "clusters_exposed": {
+                        "type": "integer"
+                    },
+                    "cvss2_score": {
+                        "type": "number"
+                    },
+                    "cvss3_score": {
+                        "type": "number"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "exploits": {
+                        "type": "boolean"
+                    },
+                    "images_exposed": {
+                        "type": "integer"
+                    },
+                    "publish_date": {
+                        "type": "string"
+                    },
+                    "severity": {
+                        "$ref": "#/components/schemas/models.Severity"
+                    },
+                    "synopsis": {
+                        "type": "string"
+                    }
+                },
+                "description": "CVE in workload data presents in response"
+            },
+            "cves.GetExposedClustersCountResponse": {
+                "type": "object",
+                "properties": {
+                    "count": {
+                        "type": "integer"
+                    }
+                }
+            },
+            "cves.GetExposedClustersResponse": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/cves.GetExposedClustersSelect"
+                        }
+                    },
+                    "meta": {
+                        "type": "object"
+                    }
+                }
+            },
+            "cves.GetExposedClustersSelect": {
+                "type": "object",
+                "properties": {
+                    "display_name": {
+                        "type": "string"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "last_seen": {
+                        "type": "string"
+                    },
+                    "provider": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string"
+                    },
+                    "version": {
+                        "type": "string"
+                    }
+                },
+                "description": "CVE exposed clusters data presents in response"
+            },
+            "models.Severity": {
+                "type": "string",
+                "enum": [
+                    "NotSet",
+                    "None",
+                    "Low",
+                    "Medium",
+                    "Moderate",
+                    "Important",
+                    "High",
+                    "Critical"
+                ],
+                "x-enum-varnames": [
+                    "NotSet",
+                    "None",
+                    "Low",
+                    "Medium",
+                    "Moderate",
+                    "Important",
+                    "High",
+                    "Critical"
+                ]
+            }
+        },
+        "securitySchemes": {
+            "BasicAuth": {
+                "type": "http",
+                "scheme": "basic"
+            },
+            "RhIdentity": {
+                "type": "apiKey",
+                "name": "x-rh-identity",
+                "in": "header"
+            }
+        }
+    },
+    "x-original-swagger-version": "2.0"
+}

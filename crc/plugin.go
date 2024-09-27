@@ -22,6 +22,9 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			openshiftInsightsVulnerabilitiesV1Clusters:             tableVulnerabilitiesClustersV1(ctx),
 			openshiftInsightsVulnerabilitiesV1ClusterCVEs:          tableVulnerabilitiesClusterCVEsV1(ctx),
 			openshiftInsightsVulnerabilitiesV1ClusterExposedImages: tableVulnerabilitiesClusterExposedImagesV1(ctx),
+			openshiftInsightsVulnerabilitiesV1CVEs:                 tableVulnerabilitiesCVEsV1(ctx),
+			openshiftInsightsVulnerabilitiesV1CVEsExposedClusters:  tableVulnerabilitiesCVEsExposedClustersV1(ctx),
+			openshiftInsightsVulnerabilitiesV1CVEsExposedImages:    tableVulnerabilitiesCVEsExposedImagesV1(ctx),
 		},
 	}
 	return p
