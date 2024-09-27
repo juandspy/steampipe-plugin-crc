@@ -1,18 +1,18 @@
-package crc
+package vulnerabilities
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
 	"io"
-	"net/http"
 
+	"github.com/juandspy/steampipe-plugin-crc/crc/utils"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
-const openshiftInsightsVulnerabilitiesV1Clusters = "openshift_insights_vulnerabilities_v1_clusters"
+const V1ClustersTableName = "openshift_insights_vulnerabilities_v1_clusters"
 
 type VulnerabilitiesV1ClustersResponse struct {
 	Data []struct {
@@ -33,9 +33,9 @@ type VulnerabilitiesV1ClustersResponse struct {
 	Meta struct{} `json:"meta"`
 }
 
-func tableVulnerabilitiesClustersV1(_ context.Context) *plugin.Table {
+func TableClustersV1(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        openshiftInsightsVulnerabilitiesV1Clusters,
+		Name:        V1ClustersTableName,
 		Description: "Retrieves all clusters for given organization, retrieves the impacting rules for each cluster and the count of impacting CVEs.",
 		List: &plugin.ListConfig{
 			Hydrate: listVulnerabilitiesClustersV1,
@@ -45,84 +45,71 @@ func tableVulnerabilitiesClustersV1(_ context.Context) *plugin.Table {
 				Name:        "cluster_id",
 				Type:        proto.ColumnType_STRING,
 				Description: "Cluster ID.",
-				Transform:   transform.FromField("cluster_id"),
+				Transform:   transform.FromField("ID"),
 			},
 			{
 				Name:        "display_name",
 				Type:        proto.ColumnType_STRING,
 				Description: "Cluster display name.",
-				Transform:   transform.FromField("display_name"),
+				Transform:   transform.FromField("DisplayName"),
 			},
 			{
 				Name:        "version",
 				Type:        proto.ColumnType_STRING,
 				Description: "Cluster version.",
-				Transform:   transform.FromField("version"),
+				Transform:   transform.FromField("Version"),
 			},
 			{
 				Name:        "provider",
 				Type:        proto.ColumnType_STRING,
 				Description: "Provider of the cluster.",
-				Transform:   transform.FromField("provider"),
+				Transform:   transform.FromField("Provider"),
 			},
 			{
 				Name:        "last_seen",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Description: "The time the cluster was last checked at.",
-				Transform:   transform.FromField("last_seen"),
+				Transform:   transform.FromField("LastSeen"),
 			},
 			{
 				Name:        "status",
 				Type:        proto.ColumnType_STRING,
 				Description: "Status of the cluster.",
-				Transform:   transform.FromField("status"),
+				Transform:   transform.FromField("Status"),
 			},
 			{
 				Name:        "low_cves",
 				Type:        proto.ColumnType_INT,
 				Description: "The total low CVEs.",
-				Transform:   transform.FromField("low_cves"),
+				Transform:   transform.FromField("CvesSeverity.Low"),
 			},
 			{
 				Name:        "moderate_cves",
 				Type:        proto.ColumnType_INT,
 				Description: "The total moderate CVEs.",
-				Transform:   transform.FromField("moderate_cves"),
+				Transform:   transform.FromField("CvesSeverity.Moderate"),
 			},
 			{
 				Name:        "important_cves",
 				Type:        proto.ColumnType_INT,
 				Description: "The total important CVEs.",
-				Transform:   transform.FromField("important_cves"),
+				Transform:   transform.FromField("CvesSeverity.Important"),
 			},
 			{
 				Name:        "critical_cves",
 				Type:        proto.ColumnType_INT,
 				Description: "The total critical CVEs.",
-				Transform:   transform.FromField("critical_cves"),
+				Transform:   transform.FromField("CvesSeverity.Critical"),
 			},
 		},
 	}
 }
 
 func listVulnerabilitiesClustersV1(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	const functionName = "listVulnerabilitiesClustersV1"
-	client, err := connect(ctx, d, defaultTimeout)
+	endpoint := "api/ocp-vulnerability/v1/clusters"
+	resp, err := utils.MakeAPIRequest(ctx, d, "GET", endpoint, nil, utils.DefaultTimeout)
 	if err != nil {
-		pluginLogError(ctx, openshiftInsightsVulnerabilitiesV1Clusters, functionName, "client_error", err)
-		return nil, err
-	}
-
-	url := "https://console.redhat.com/api/ocp-vulnerability/v1/clusters"
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		pluginLogError(ctx, openshiftInsightsVulnerabilitiesV1Clusters, functionName, "request_error", err)
-		return nil, err
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		pluginLogError(ctx, openshiftInsightsVulnerabilitiesV1Clusters, functionName, "api_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1ClustersTableName, "api_error", err)
 		return nil, err
 	}
 
@@ -131,29 +118,18 @@ func listVulnerabilitiesClustersV1(ctx context.Context, d *plugin.QueryData, h *
 	if resp.StatusCode != 200 {
 		bodyBytes, _ := io.ReadAll(resp.Body)
 		err = fmt.Errorf("API request failed with status code %d: %s", resp.StatusCode, string(bodyBytes))
-		pluginLogError(ctx, openshiftInsightsVulnerabilitiesV1Clusters, functionName, "api_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1ClustersTableName, "api_error", err)
 		return nil, err
 	}
 
 	clusterResponse, err := decodeVulnerabilitiesClustersV1(resp.Body)
 	if err != nil {
-		pluginLogError(ctx, openshiftInsightsVulnerabilitiesV1Clusters, functionName, "decode_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1ClustersTableName, "decode_error", err)
 		return nil, err
 	}
 
 	for _, cluster := range clusterResponse.Data {
-		row := map[string]interface{}{}
-		row["cluster_id"] = cluster.ID
-		row["display_name"] = cluster.DisplayName
-		row["version"] = cluster.Version
-		row["provider"] = cluster.Provider
-		row["last_seen"] = cluster.LastSeen
-		row["status"] = cluster.Status
-		row["low_cves"] = cluster.CvesSeverity.Low
-		row["moderate_cves"] = cluster.CvesSeverity.Moderate
-		row["important_cves"] = cluster.CvesSeverity.Important
-		row["critical_cves"] = cluster.CvesSeverity.Critical
-		d.StreamListItem(ctx, row)
+		d.StreamListItem(ctx, cluster)
 	}
 
 	return nil, nil

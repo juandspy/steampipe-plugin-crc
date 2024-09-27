@@ -1,18 +1,18 @@
-package crc
+package vulnerabilities
 
 import (
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"net/http"
 
+	"github.com/juandspy/steampipe-plugin-crc/crc/utils"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
-const openshiftInsightsVulnerabilitiesV1CVEsExposedClusters = "openshift_insights_vulnerabilities_v1_cves_exposed_clusters"
+const V1CVEsExposedClustersTableName = "openshift_insights_vulnerabilities_v1_cves_exposed_clusters"
 
 type vulnerabilitiesV1CVEsExposedClustersResponse struct {
 	Data []struct {
@@ -27,9 +27,9 @@ type vulnerabilitiesV1CVEsExposedClustersResponse struct {
 	Meta struct{} `json:"meta"`
 }
 
-func tableVulnerabilitiesCVEsExposedClustersV1(_ context.Context) *plugin.Table {
+func TableCVEsExposedClustersV1(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        openshiftInsightsVulnerabilitiesV1CVEsExposedClusters,
+		Name:        V1CVEsExposedClustersTableName,
 		Description: "Retrieves exposed clusters for a specific CVE.",
 		List: &plugin.ListConfig{
 			Hydrate:    getVulnerabilitiesCVEsExposedClustersV1,
@@ -82,47 +82,26 @@ func tableVulnerabilitiesCVEsExposedClustersV1(_ context.Context) *plugin.Table 
 }
 
 func getVulnerabilitiesCVEsExposedClustersV1(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	const functionName = "getVulnerabilitiesCVEsExposedClustersV1"
-
 	cveName := d.EqualsQualString("cve_name")
 
 	if cveName == "" {
 		err := errors.New("you must specify a CVE name")
-		pluginLogError(ctx, openshiftInsightsVulnerabilitiesV1CVEsExposedClusters, functionName, "query_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1CVEsExposedClustersTableName, "query_error", err)
 		return nil, err
 	}
 
-	client, err := connect(ctx, d, defaultTimeout)
+	endpoint := fmt.Sprintf("api/ocp-vulnerability/v1/cves/%s/exposed_clusters", cveName)
+	resp, err := utils.MakeAPIRequest(ctx, d, "GET", endpoint, nil, utils.DefaultTimeout)
 	if err != nil {
-		pluginLogError(ctx, openshiftInsightsVulnerabilitiesV1CVEsExposedClusters, functionName, "client_error", err)
-		return nil, err
-	}
-
-	url := fmt.Sprintf("https://console.redhat.com/api/ocp-vulnerability/v1/cves/%s/exposed_clusters", cveName)
-
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		pluginLogError(ctx, openshiftInsightsVulnerabilitiesV1CVEsExposedClusters, functionName, "request_error", err)
-		return nil, err
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		pluginLogError(ctx, openshiftInsightsVulnerabilitiesV1CVEsExposedClusters, functionName, "api_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1CVEsExposedClustersTableName, "api_error", err)
 		return nil, err
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != 200 {
-		err = fmt.Errorf("API request failed with status code %d", resp.StatusCode)
-		pluginLogError(ctx, openshiftInsightsVulnerabilitiesV1CVEsExposedClusters, functionName, "api_error", err)
-		return nil, err
-	}
-
 	var exposedClustersResponse vulnerabilitiesV1CVEsExposedClustersResponse
 	err = json.NewDecoder(resp.Body).Decode(&exposedClustersResponse)
 	if err != nil {
-		pluginLogError(ctx, openshiftInsightsVulnerabilitiesV1CVEsExposedClusters, functionName, "decode_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1CVEsExposedClustersTableName, "decode_error", err)
 		return nil, err
 	}
 

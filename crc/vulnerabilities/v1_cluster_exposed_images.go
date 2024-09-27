@@ -1,4 +1,4 @@
-package crc
+package vulnerabilities
 
 import (
 	"context"
@@ -6,14 +6,14 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"net/http"
 
+	"github.com/juandspy/steampipe-plugin-crc/crc/utils"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
-const openshiftInsightsVulnerabilitiesV1ClusterExposedImages = "openshift_insights_vulnerabilities_v1_cluster_exposed_images"
+const V1ClusterExposedImagesTableName = "openshift_insights_vulnerabilities_v1_cluster_exposed_images"
 
 type vulnerabilitiesV1ClusterExposedImagesResponse struct {
 	Data []struct {
@@ -24,9 +24,9 @@ type vulnerabilitiesV1ClusterExposedImagesResponse struct {
 	Meta struct{} `json:"meta"`
 }
 
-func tableVulnerabilitiesClusterExposedImagesV1(_ context.Context) *plugin.Table {
+func TableClusterExposedImagesV1(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        openshiftInsightsVulnerabilitiesV1ClusterExposedImages,
+		Name:        V1ClusterExposedImagesTableName,
 		Description: "Retrieves exposed images for a specific Cluster ID.",
 		List: &plugin.ListConfig{
 			Hydrate:    getVulnerabilitiesClusterExposedImagesV1,
@@ -59,51 +59,32 @@ func tableVulnerabilitiesClusterExposedImagesV1(_ context.Context) *plugin.Table
 }
 
 func getVulnerabilitiesClusterExposedImagesV1(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	const functionName = "getVulnerabilitiesClusterExposedImagesV1"
-
 	clusterID := d.EqualsQualString("cluster_id")
 
 	if clusterID == "" {
 		err := errors.New("you must specify a Cluster ID")
-		pluginLogError(ctx, openshiftInsightsVulnerabilitiesV1ClusterExposedImages, functionName, "query_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1ClusterExposedImagesTableName, "query_error", err)
 		return nil, err
 	}
 
-	client, err := connect(ctx, d, defaultTimeout)
+	endpoint := fmt.Sprintf("api/ocp-vulnerability/v1/clusters/%s/exposed_images", clusterID)
+	resp, err := utils.MakeAPIRequest(ctx, d, "GET", endpoint, nil, utils.DefaultTimeout)
 	if err != nil {
-		pluginLogError(ctx, openshiftInsightsVulnerabilitiesV1ClusterExposedImages, functionName, "client_error", err)
-		return nil, err
-	}
-
-	url := fmt.Sprintf("https://console.redhat.com/api/ocp-vulnerability/v1/clusters/%s/exposed_images", clusterID)
-
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		pluginLogError(ctx, openshiftInsightsVulnerabilitiesV1ClusterExposedImages, functionName, "request_error", err)
-		return nil, err
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		pluginLogError(ctx, openshiftInsightsVulnerabilitiesV1ClusterExposedImages, functionName, "api_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1ClusterExposedImagesTableName, "api_error", err)
 		return nil, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
 		err = fmt.Errorf("API request failed with status code %d", resp.StatusCode)
-		pluginLogError(ctx, openshiftInsightsVulnerabilitiesV1ClusterExposedImages, functionName, "api_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1ClusterExposedImagesTableName, "api_error", err)
 		return nil, err
 	}
 
 	exposedImagesResponse, err := decodeVulnerabilitiesClusterExposedImagesV1Response(resp.Body)
 	if err != nil {
-		pluginLogError(ctx, openshiftInsightsVulnerabilitiesV1ClusterExposedImages, functionName, "decode_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1ClusterExposedImagesTableName, "decode_error", err)
 		return nil, err
-	}
-
-	if len(exposedImagesResponse.Data) == 0 {
-		return nil, nil
 	}
 
 	for _, image := range exposedImagesResponse.Data {

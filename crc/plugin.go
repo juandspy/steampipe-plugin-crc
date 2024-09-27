@@ -3,6 +3,10 @@ package crc
 import (
 	"context"
 
+	"github.com/juandspy/steampipe-plugin-crc/crc/aggregator"
+	gcs "github.com/juandspy/steampipe-plugin-crc/crc/gathering_conditions_service"
+	"github.com/juandspy/steampipe-plugin-crc/crc/utils"
+	"github.com/juandspy/steampipe-plugin-crc/crc/vulnerabilities"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
@@ -12,19 +16,19 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 		Name:             "steampipe-plugin-crc",
 		DefaultTransform: transform.FromGo().NullIfZero(),
 		ConnectionConfigSchema: &plugin.ConnectionConfigSchema{
-			NewInstance: ConfigInstance,
+			NewInstance: utils.ConfigInstance,
 		},
 		TableMap: map[string]*plugin.Table{
-			openshiftInsightsGCSV1GatheringRules:                   tableInsightsGatheringRulesV1(ctx),
-			openshiftInsightsGCSV2RemoteConfiguration:              tableInsightsGatheringRulesV2(ctx),
-			openshiftInsightsAggregatorV2Clusters:                  tableAggregatorClustersV2(ctx),
-			openshiftInsightsAggregatorV2ClusterReports:            tableAggregatorClusterReportsV2(ctx),
-			openshiftInsightsVulnerabilitiesV1Clusters:             tableVulnerabilitiesClustersV1(ctx),
-			openshiftInsightsVulnerabilitiesV1ClusterCVEs:          tableVulnerabilitiesClusterCVEsV1(ctx),
-			openshiftInsightsVulnerabilitiesV1ClusterExposedImages: tableVulnerabilitiesClusterExposedImagesV1(ctx),
-			openshiftInsightsVulnerabilitiesV1CVEs:                 tableVulnerabilitiesCVEsV1(ctx),
-			openshiftInsightsVulnerabilitiesV1CVEsExposedClusters:  tableVulnerabilitiesCVEsExposedClustersV1(ctx),
-			openshiftInsightsVulnerabilitiesV1CVEsExposedImages:    tableVulnerabilitiesCVEsExposedImagesV1(ctx),
+			gcs.V1GatheringRulesTableName:                   gcs.TableGatheringRulesV1(ctx),
+			gcs.V2RemoteConfigurationTableName:              gcs.TableGatheringRulesV2(ctx),
+			aggregator.V2ClustersTableName:                  aggregator.TableClustersV2(ctx),
+			aggregator.V2ClusterReportsTableName:            aggregator.TableClusterReportsV2(ctx),
+			vulnerabilities.V1ClustersTableName:             vulnerabilities.TableClustersV1(ctx),
+			vulnerabilities.V1ClusterCVEsTableName:          vulnerabilities.TableClusterCVEsV1(ctx),
+			vulnerabilities.V1ClusterExposedImagesTableName: vulnerabilities.TableClusterExposedImagesV1(ctx),
+			vulnerabilities.V1CVEsTableName:                 vulnerabilities.TableCVEsV1(ctx),
+			vulnerabilities.V1CVEsExposedClustersTableName:  vulnerabilities.TableCVEsExposedClustersV1(ctx),
+			vulnerabilities.V1CVEsExposedImagesTableName:    vulnerabilities.TableCVEsExposedImagesV1(ctx),
 		},
 	}
 	return p

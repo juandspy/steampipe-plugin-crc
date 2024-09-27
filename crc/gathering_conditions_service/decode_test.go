@@ -1,4 +1,4 @@
-package crc
+package gathering_conditions_service
 
 import (
 	"io"

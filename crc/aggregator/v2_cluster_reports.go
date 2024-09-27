@@ -1,4 +1,4 @@
-package crc
+package aggregator
 
 import (
 	"context"
@@ -6,15 +6,16 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"net/http"
 	"time"
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
+
+	"github.com/juandspy/steampipe-plugin-crc/crc/utils"
 )
 
-const openshiftInsightsAggregatorV2ClusterReports = "openshift_insights_aggregator_v2_cluster_reports"
+const V2ClusterReportsTableName = "openshift_insights_aggregator_v2_cluster_reports"
 
 type ClusterReportsResponseV2 struct {
 	Report struct {
@@ -53,7 +54,7 @@ type ClusterReportsResponseV2 struct {
 	Status string `json:"status"`
 }
 
-func tableAggregatorClusterReportsV2(_ context.Context) *plugin.Table {
+func TableClusterReportsV2(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "openshift_insights_aggregator_v2_cluster_reports",
 		Description: "Returns the latest report for the given cluster.",
@@ -153,33 +154,19 @@ func tableAggregatorClusterReportsV2(_ context.Context) *plugin.Table {
 }
 
 func listClusterReportsV2(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	const functionName = "listClusterReportsV2"
-
 	// get the cluster ID
 	clusterID := d.EqualsQualString("cluster_id")
 
 	if clusterID == "" {
 		err := errors.New("you must specify an OCP version")
-		pluginLogError(ctx, openshiftInsightsAggregatorV2ClusterReports, functionName, "query_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V2ClusterReportsTableName, "query_error", err)
 		return nil, err
 	}
 
-	client, err := connect(ctx, d, defaultTimeout)
+	endpoint := fmt.Sprintf("api/insights-results-aggregator/v2/cluster/%s/reports", clusterID)
+	resp, err := utils.MakeAPIRequest(ctx, d, "GET", endpoint, nil, utils.DefaultTimeout)
 	if err != nil {
-		pluginLogError(ctx, openshiftInsightsAggregatorV2ClusterReports, functionName, "client_error", err)
-		return nil, err
-	}
-
-	url := fmt.Sprintf("https://console.redhat.com/api/insights-results-aggregator/v2/cluster/%s/reports", clusterID)
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		pluginLogError(ctx, openshiftInsightsAggregatorV2ClusterReports, functionName, "request_error", err)
-		return nil, err
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		pluginLogError(ctx, openshiftInsightsAggregatorV2ClusterReports, functionName, "api_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V2ClusterReportsTableName, "api_error", err)
 		return nil, err
 	}
 
@@ -187,13 +174,7 @@ func listClusterReportsV2(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 
 	clusterReportsResponse, err := decodeClusterReportsResponseV2(resp.Body)
 	if err != nil {
-		pluginLogError(ctx, openshiftInsightsAggregatorV2ClusterReports, functionName, "decode_error", err)
-		return nil, err
-	}
-
-	if resp.StatusCode != 200 {
-		err = errors.New(clusterReportsResponse.Status)
-		pluginLogError(ctx, openshiftInsightsAggregatorV2ClusterReports, functionName, "api_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V2ClusterReportsTableName, "decode_error", err)
 		return nil, err
 	}
 

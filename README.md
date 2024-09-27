@@ -71,6 +71,7 @@ SELECT
     cluster_id, cluster_name, cluster_version, managed, last_checked_at,
     total_hit_count, hits_by_total_risk
 FROM crc.openshift_insights_aggregator_v2_clusters
+LIMIT 10
 ```
 
 #### Find problematic clusters
