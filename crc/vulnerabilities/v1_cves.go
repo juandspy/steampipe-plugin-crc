@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"net/http"
 
 	"github.com/juandspy/steampipe-plugin-crc/crc/utils"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
@@ -97,37 +96,25 @@ func TableCVEsV1(_ context.Context) *plugin.Table {
 
 func listVulnerabilitiesCVEsV1(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	// TODO: add pagination, sorting, filtering and so on.
-	const functionName = "listVulnerabilitiesCVEsV1"
-	client, err := utils.GetConsoleDotClient(ctx, d, utils.DefaultTimeout)
-	if err != nil {
-		utils.LogErrorUsingSteampipeLogger(ctx, V1CVEsTableName, functionName, "client_error", err)
-		return nil, err
-	}
 
-	url := "https://console.redhat.com/api/ocp-vulnerability/v1/cves"
-	req, err := http.NewRequest("GET", url, nil)
+	endpoint := "api/ocp-vulnerability/v1/cves"
+	resp, err := utils.MakeAPIRequest(ctx, d, "GET", endpoint, nil, utils.DefaultTimeout)
 	if err != nil {
-		utils.LogErrorUsingSteampipeLogger(ctx, V1CVEsTableName, functionName, "request_error", err)
-		return nil, err
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		utils.LogErrorUsingSteampipeLogger(ctx, V1CVEsTableName, functionName, "api_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1CVEsTableName, "api_error", err)
 		return nil, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
 		err = fmt.Errorf("API request failed with status code %d", resp.StatusCode)
-		utils.LogErrorUsingSteampipeLogger(ctx, V1CVEsTableName, functionName, "api_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1CVEsTableName, "api_error", err)
 		return nil, err
 	}
 
 	var cveResponse vulnerabilitiesV1CVEsResponse
 	err = json.NewDecoder(resp.Body).Decode(&cveResponse)
 	if err != nil {
-		utils.LogErrorUsingSteampipeLogger(ctx, V1CVEsTableName, functionName, "decode_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1CVEsTableName, "decode_error", err)
 		return nil, err
 	}
 

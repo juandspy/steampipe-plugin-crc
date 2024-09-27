@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"net/http"
 
 	"github.com/juandspy/steampipe-plugin-crc/crc/utils"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
@@ -91,53 +90,30 @@ func TableClusterCVEsV1(_ context.Context) *plugin.Table {
 }
 
 func getVulnerabilitiesClusterCVEsV1(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	const functionName = "getVulnerabilitiesClusterCVEsV1"
-
 	clusterID := d.EqualsQualString("cluster_id")
 
 	if clusterID == "" {
 		err := errors.New("you must specify a Cluster ID")
-		utils.LogErrorUsingSteampipeLogger(ctx, V1ClusterCVEsTableName, functionName, "query_error", err)
-		return nil, err
-	}
-	client, err := utils.GetConsoleDotClient(ctx, d, utils.DefaultTimeout)
-	if err != nil {
-		utils.LogErrorUsingSteampipeLogger(ctx, V1ClusterCVEsTableName, functionName, "client_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1ClusterCVEsTableName, "query_error", err)
 		return nil, err
 	}
 
-	url := fmt.Sprintf("https://console.redhat.com/api/ocp-vulnerability/v1/clusters/%s/cves", clusterID)
-
-	req, err := http.NewRequest("GET", url, nil)
+	endpoint := fmt.Sprintf("api/ocp-vulnerability/v1/clusters/%s/cves", clusterID)
+	resp, err := utils.MakeAPIRequest(ctx, d, "GET", endpoint, nil, utils.DefaultTimeout)
 	if err != nil {
-		utils.LogErrorUsingSteampipeLogger(ctx, V1ClusterCVEsTableName, functionName, "request_error", err)
-		return nil, err
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		utils.LogErrorUsingSteampipeLogger(ctx, V1ClusterCVEsTableName, functionName, "api_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1ClusterCVEsTableName, "api_error", err)
 		return nil, err
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != 200 {
-		err = fmt.Errorf("API request failed with status code %d", resp.StatusCode)
-		utils.LogErrorUsingSteampipeLogger(ctx, V1ClusterCVEsTableName, functionName, "api_error", err)
-		return nil, err
-	}
-
 	cveResponse, err := decodeVulnerabilitiesClusterCVEsV1Response(resp.Body)
 	if err != nil {
-		utils.LogErrorUsingSteampipeLogger(ctx, V1ClusterCVEsTableName, functionName, "decode_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1ClusterCVEsTableName, "decode_error", err)
 		return nil, err
-	}
-
-	if len(cveResponse.Data) == 0 {
-		return nil, nil
 	}
 
 	for _, cve := range cveResponse.Data {
+		// TODO: Simplify this
 		row := map[string]interface{}{}
 		row["cluster_id"] = clusterID
 		row["synopsis"] = cve.Synopsis

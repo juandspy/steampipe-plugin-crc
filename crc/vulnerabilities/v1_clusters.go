@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"net/http"
 
 	"github.com/juandspy/steampipe-plugin-crc/crc/utils"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
@@ -107,23 +106,10 @@ func TableClustersV1(_ context.Context) *plugin.Table {
 }
 
 func listVulnerabilitiesClustersV1(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	const functionName = "listVulnerabilitiesClustersV1"
-	client, err := utils.GetConsoleDotClient(ctx, d, utils.DefaultTimeout)
+	endpoint := "api/ocp-vulnerability/v1/clusters"
+	resp, err := utils.MakeAPIRequest(ctx, d, "GET", endpoint, nil, utils.DefaultTimeout)
 	if err != nil {
-		utils.LogErrorUsingSteampipeLogger(ctx, V1ClustersTableName, functionName, "client_error", err)
-		return nil, err
-	}
-
-	url := "https://console.redhat.com/api/ocp-vulnerability/v1/clusters"
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		utils.LogErrorUsingSteampipeLogger(ctx, V1ClustersTableName, functionName, "request_error", err)
-		return nil, err
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		utils.LogErrorUsingSteampipeLogger(ctx, V1ClustersTableName, functionName, "api_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1ClustersTableName, "api_error", err)
 		return nil, err
 	}
 
@@ -132,17 +118,18 @@ func listVulnerabilitiesClustersV1(ctx context.Context, d *plugin.QueryData, h *
 	if resp.StatusCode != 200 {
 		bodyBytes, _ := io.ReadAll(resp.Body)
 		err = fmt.Errorf("API request failed with status code %d: %s", resp.StatusCode, string(bodyBytes))
-		utils.LogErrorUsingSteampipeLogger(ctx, V1ClustersTableName, functionName, "api_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1ClustersTableName, "api_error", err)
 		return nil, err
 	}
 
 	clusterResponse, err := decodeVulnerabilitiesClustersV1(resp.Body)
 	if err != nil {
-		utils.LogErrorUsingSteampipeLogger(ctx, V1ClustersTableName, functionName, "decode_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1ClustersTableName, "decode_error", err)
 		return nil, err
 	}
 
 	for _, cluster := range clusterResponse.Data {
+		// TODO: Simplify this
 		row := map[string]interface{}{}
 		row["cluster_id"] = cluster.ID
 		row["display_name"] = cluster.DisplayName

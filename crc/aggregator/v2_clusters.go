@@ -3,9 +3,7 @@ package aggregator
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"io"
-	"net/http"
 	"time"
 
 	"github.com/juandspy/steampipe-plugin-crc/crc/utils"
@@ -49,67 +47,55 @@ func TableClustersV2(_ context.Context) *plugin.Table {
 				Name:        "cluster_id",
 				Type:        proto.ColumnType_STRING,
 				Description: "Cluster ID.",
-				Transform:   transform.FromField("cluster_id"),
+				Transform:   transform.FromField("ClusterID"),
 			},
 			{
 				Name:        "cluster_name",
 				Type:        proto.ColumnType_STRING,
 				Description: "Cluster name.",
-				Transform:   transform.FromField("cluster_name"),
+				Transform:   transform.FromField("ClusterName"),
 			},
 			{
 				Name:        "cluster_version",
 				Type:        proto.ColumnType_STRING,
 				Description: "Cluster version.",
-				Transform:   transform.FromField("cluster_version"),
+				Transform:   transform.FromField("ClusterVersion"),
 			},
 			{
 				Name:        "managed",
 				Type:        proto.ColumnType_BOOL,
 				Description: "Whether the cluster is managed.",
-				Transform:   transform.FromField("managed"),
+				Transform:   transform.FromField("Managed"),
 			},
 			{
 				Name:        "last_checked_at",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Description: "The time the cluster was last checked at.",
-				Transform:   transform.FromField("last_checked_at"),
+				Transform:   transform.FromField("LastCheckedAt"),
 			},
 			{
 				Name:        "total_hit_count",
 				Type:        proto.ColumnType_INT,
 				Description: "The total hit count.",
-				Transform:   transform.FromField("total_hit_count"),
+				Transform:   transform.FromField("TotalHitCount"),
 			},
 			{
 				Name:        "hits_by_total_risk",
 				Type:        proto.ColumnType_JSON,
 				Description: "The total hits by risk.",
-				Transform:   transform.FromField("hits_by_total_risk"),
+				Transform:   transform.FromField("HitsByTotalRisk"),
 			},
 		},
 	}
 }
 
 func listClustersV2(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	const functionName = "listClustersV2"
 	timeout := 60 * time.Second // this API endpoint is very slow
-	client, err := utils.GetConsoleDotClient(ctx, d, timeout)
-	if err != nil {
-		utils.LogErrorUsingSteampipeLogger(ctx, V2ClustersTableName, functionName, "client_error", err)
-		return nil, err
-	}
 
-	url := "https://console.redhat.com/api/insights-results-aggregator/v2/clusters"
-	req, err := http.NewRequest("GET", url, nil)
+	endpoint := "api/insights-results-aggregator/v2/clusters"
+	resp, err := utils.MakeAPIRequest(ctx, d, "GET", endpoint, nil, timeout)
 	if err != nil {
-		utils.LogErrorUsingSteampipeLogger(ctx, V2ClustersTableName, functionName, "request_error", err)
-		return nil, err
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		utils.LogErrorUsingSteampipeLogger(ctx, V2ClustersTableName, functionName, "api_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V2ClustersTableName, "api_error", err)
 		return nil, err
 	}
 
@@ -117,26 +103,12 @@ func listClustersV2(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 
 	clusterResponse, err := decodeClustersV2(resp.Body)
 	if err != nil {
-		utils.LogErrorUsingSteampipeLogger(ctx, V2ClustersTableName, functionName, "decode_error", err)
-		return nil, err
-	}
-
-	if resp.StatusCode != 200 {
-		err = errors.New(clusterResponse.Status)
-		utils.LogErrorUsingSteampipeLogger(ctx, V2ClustersTableName, functionName, "api_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V2ClustersTableName, "decode_error", err)
 		return nil, err
 	}
 
 	for _, cluster := range clusterResponse.Data {
-		row := map[string]interface{}{}
-		row["cluster_id"] = cluster.ClusterID
-		row["cluster_name"] = cluster.ClusterName
-		row["cluster_version"] = cluster.ClusterVersion
-		row["managed"] = cluster.Managed
-		row["last_checked_at"] = cluster.LastCheckedAt
-		row["total_hit_count"] = cluster.TotalHitCount
-		row["hits_by_total_risk"] = cluster.HitsByTotalRisk
-		d.StreamListItem(ctx, row)
+		d.StreamListItem(ctx, cluster)
 	}
 
 	return nil, nil

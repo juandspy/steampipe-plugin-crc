@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"io"
-	"net/http"
 
 	"github.com/juandspy/steampipe-plugin-crc/crc/utils"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
@@ -54,30 +53,17 @@ func TableGatheringRulesV1(_ context.Context) *plugin.Table {
 
 // listGatheringRulesV1 populates the table with all the gathering rules in the API
 func listGatheringRulesV1(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	const functionName = "listGatheringRulesV1"
-	client, err := utils.GetConsoleDotClient(ctx, d, utils.DefaultTimeout)
+	endpoint := "api/gathering/v1/gathering_rules"
+	resp, err := utils.MakeAPIRequest(ctx, d, "GET", endpoint, nil, utils.DefaultTimeout)
 	if err != nil {
-		utils.LogErrorUsingSteampipeLogger(ctx, V1GatheringRulesTableName, functionName, "client_error", err)
-		return nil, err
-	}
-
-	url := "https://console.redhat.com/api/gathering/v1/gathering_rules"
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		utils.LogErrorUsingSteampipeLogger(ctx, V1GatheringRulesTableName, functionName, "request_error", err)
-		return nil, err
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		utils.LogErrorUsingSteampipeLogger(ctx, V1GatheringRulesTableName, functionName, "api_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1GatheringRulesTableName, "api_error", err)
 		return nil, err
 	}
 	defer resp.Body.Close()
 
 	rules, err := decodeGatheringRulesV1(resp.Body)
 	if err != nil {
-		utils.LogErrorUsingSteampipeLogger(ctx, V1GatheringRulesTableName, functionName, "decode_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1GatheringRulesTableName, "decode_error", err)
 		return nil, err
 	}
 

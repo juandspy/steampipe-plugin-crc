@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"net/http"
 
 	"github.com/juandspy/steampipe-plugin-crc/crc/utils"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
@@ -61,51 +60,28 @@ func TableGatheringRulesV2(_ context.Context) *plugin.Table {
 
 // getGatheringRulesV2 populates the table with all the gathering rules for a specific OCP version
 func getGatheringRulesV2(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	const functionName = "getGatheringRulesV2"
-
 	// get the OCP Version
 	ocpVersion := d.EqualsQualString("ocp_version")
 
 	if ocpVersion == "" {
 		err := errors.New("you must specify an OCP version")
-		utils.LogErrorUsingSteampipeLogger(ctx, V2RemoteConfigurationTableName, functionName, "query_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V2RemoteConfigurationTableName, "query_error", err)
 		return nil, err
 	}
-
-	client, err := utils.GetConsoleDotClient(ctx, d, utils.DefaultTimeout)
+	endpoint := fmt.Sprintf("api/gathering/v2/%s/gathering_rules", ocpVersion)
+	resp, err := utils.MakeAPIRequest(ctx, d, "GET", endpoint, nil, utils.DefaultTimeout)
 	if err != nil {
-		utils.LogErrorUsingSteampipeLogger(ctx, V2RemoteConfigurationTableName, functionName, "client_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V2RemoteConfigurationTableName, "api_error", err)
 		return nil, err
 	}
 
-	url := fmt.Sprintf("https://console.redhat.com/api/gathering/v2/%s/gathering_rules", ocpVersion)
-
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		utils.LogErrorUsingSteampipeLogger(ctx, V2RemoteConfigurationTableName, functionName, "request_error", err)
-		return nil, err
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		utils.LogErrorUsingSteampipeLogger(ctx, V2RemoteConfigurationTableName, functionName, "api_error", err)
-		return nil, err
-	}
 	defer resp.Body.Close()
-
-	if resp.StatusCode != 200 {
-		err = errors.New(resp.Status)
-		utils.LogErrorUsingSteampipeLogger(ctx, V2RemoteConfigurationTableName, functionName, "api_error", err)
-		return nil, err
-	}
 
 	rules, err := decodeGatheringRulesV2(resp.Body)
 	if err != nil {
-		utils.LogErrorUsingSteampipeLogger(ctx, V2RemoteConfigurationTableName, functionName, "decode_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V2RemoteConfigurationTableName, "decode_error", err)
 		return nil, err
 	}
-
-	plugin.Logger(ctx).Warn(functionName, "rules", rules)
 
 	return rules, nil
 }

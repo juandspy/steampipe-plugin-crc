@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"net/http"
 
 	"github.com/juandspy/steampipe-plugin-crc/crc/utils"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
@@ -65,47 +64,26 @@ func TableCVEsExposedImagesV1(_ context.Context) *plugin.Table {
 }
 
 func getVulnerabilitiesCVEsExposedImagesV1(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	const functionName = "getVulnerabilitiesCVEsExposedImagesV1"
-
 	cveName := d.EqualsQualString("cve_name")
 
 	if cveName == "" {
 		err := errors.New("you must specify a CVE name")
-		utils.LogErrorUsingSteampipeLogger(ctx, V1CVEsExposedImagesTableName, functionName, "query_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1CVEsExposedImagesTableName, "query_error", err)
 		return nil, err
 	}
 
-	client, err := utils.GetConsoleDotClient(ctx, d, utils.DefaultTimeout)
+	endpoint := fmt.Sprintf("api/ocp-vulnerability/v1/cves/%s/exposed_images", cveName)
+	resp, err := utils.MakeAPIRequest(ctx, d, "GET", endpoint, nil, utils.DefaultTimeout)
 	if err != nil {
-		utils.LogErrorUsingSteampipeLogger(ctx, V1CVEsExposedImagesTableName, functionName, "client_error", err)
-		return nil, err
-	}
-
-	url := fmt.Sprintf("https://console.redhat.com/api/ocp-vulnerability/v1/cves/%s/exposed_images", cveName)
-
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		utils.LogErrorUsingSteampipeLogger(ctx, V1CVEsExposedImagesTableName, functionName, "request_error", err)
-		return nil, err
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		utils.LogErrorUsingSteampipeLogger(ctx, V1CVEsExposedImagesTableName, functionName, "api_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1CVEsExposedImagesTableName, "api_error", err)
 		return nil, err
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != 200 {
-		err = fmt.Errorf("API request failed with status code %d", resp.StatusCode)
-		utils.LogErrorUsingSteampipeLogger(ctx, V1CVEsExposedImagesTableName, functionName, "api_error", err)
-		return nil, err
-	}
-
 	var exposedImagesResponse vulnerabilitiesV1CVEsExposedImagesResponse
 	err = json.NewDecoder(resp.Body).Decode(&exposedImagesResponse)
 	if err != nil {
-		utils.LogErrorUsingSteampipeLogger(ctx, V1CVEsExposedImagesTableName, functionName, "decode_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1CVEsExposedImagesTableName, "decode_error", err)
 		return nil, err
 	}
 

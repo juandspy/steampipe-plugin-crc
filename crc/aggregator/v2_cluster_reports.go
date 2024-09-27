@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"net/http"
 	"time"
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
@@ -155,33 +154,19 @@ func TableClusterReportsV2(_ context.Context) *plugin.Table {
 }
 
 func listClusterReportsV2(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	const functionName = "listClusterReportsV2"
-
 	// get the cluster ID
 	clusterID := d.EqualsQualString("cluster_id")
 
 	if clusterID == "" {
 		err := errors.New("you must specify an OCP version")
-		utils.LogErrorUsingSteampipeLogger(ctx, V2ClusterReportsTableName, functionName, "query_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V2ClusterReportsTableName, "query_error", err)
 		return nil, err
 	}
 
-	client, err := utils.GetConsoleDotClient(ctx, d, utils.DefaultTimeout)
+	endpoint := fmt.Sprintf("api/insights-results-aggregator/v2/cluster/%s/reports", clusterID)
+	resp, err := utils.MakeAPIRequest(ctx, d, "GET", endpoint, nil, utils.DefaultTimeout)
 	if err != nil {
-		utils.LogErrorUsingSteampipeLogger(ctx, V2ClusterReportsTableName, functionName, "client_error", err)
-		return nil, err
-	}
-
-	url := fmt.Sprintf("https://console.redhat.com/api/insights-results-aggregator/v2/cluster/%s/reports", clusterID)
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		utils.LogErrorUsingSteampipeLogger(ctx, V2ClusterReportsTableName, functionName, "request_error", err)
-		return nil, err
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		utils.LogErrorUsingSteampipeLogger(ctx, V2ClusterReportsTableName, functionName, "api_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V2ClusterReportsTableName, "api_error", err)
 		return nil, err
 	}
 
@@ -189,13 +174,7 @@ func listClusterReportsV2(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 
 	clusterReportsResponse, err := decodeClusterReportsResponseV2(resp.Body)
 	if err != nil {
-		utils.LogErrorUsingSteampipeLogger(ctx, V2ClusterReportsTableName, functionName, "decode_error", err)
-		return nil, err
-	}
-
-	if resp.StatusCode != 200 {
-		err = errors.New(clusterReportsResponse.Status)
-		utils.LogErrorUsingSteampipeLogger(ctx, V2ClusterReportsTableName, functionName, "api_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V2ClusterReportsTableName, "decode_error", err)
 		return nil, err
 	}
 
