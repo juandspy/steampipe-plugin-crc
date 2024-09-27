@@ -19,6 +19,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			openshiftInsightsGCSV2RemoteConfiguration:   tableInsightsGatheringRulesV2(ctx),
 			openshiftInsightsAggregatorV2Clusters:       tableAggregatorClustersV2(ctx),
 			openshiftInsightsAggregatorV2ClusterReports: tableAggregatorClusterReportsV2(ctx),
+			openshiftInsightsVulnerabilitiesV1Clusters:  tableVulnerabilitiesClustersV1(ctx),
 		},
 	}
 	return p

@@ -132,3 +132,22 @@ WHERE ocp_version = 'foo';
 ```
 
 This will print a 400 error.
+
+### openshift_insights_vulnerabilities_v1_clusters
+
+#### List your clusters
+
+```sql
+SELECT
+    cluster_id,
+    display_name,
+    version,
+    provider,
+    last_seen,
+    status,
+    low_cves,
+    moderate_cves,
+    important_cves,
+    critical_cves
+FROM crc.openshift_insights_vulnerabilities_v1_clusters
+```
