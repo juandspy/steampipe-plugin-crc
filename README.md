@@ -151,3 +151,22 @@ SELECT
     critical_cves
 FROM crc.openshift_insights_vulnerabilities_v1_clusters
 ```
+
+### openshift_insights_vulnerabilities_v1_cluster_cves
+
+#### List CVEs for a cluster
+
+```sql
+SELECT synopsis, severity, cvss3_score
+FROM crc.openshift_insights_vulnerabilities_v1_cluster_cves
+WHERE cluster_id = 'a5192f07-c608-40bb-8166-cf012af8c5b2'
+```
+
+#### List CVEs for a cluster with a severity filter
+
+```sql
+SELECT synopsis, severity, cvss3_score
+FROM crc.openshift_insights_vulnerabilities_v1_cluster_cves
+WHERE cluster_id = 'a5192f07-c608-40bb-8166-cf012af8c5b2'
+AND severity = 'Low'
+```
