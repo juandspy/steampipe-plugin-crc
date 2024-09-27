@@ -132,3 +132,83 @@ WHERE ocp_version = 'foo';
 ```
 
 This will print a 400 error.
+
+### openshift_insights_vulnerabilities_v1_clusters
+
+#### List your clusters
+
+```sql
+SELECT
+    cluster_id,
+    display_name,
+    version,
+    provider,
+    last_seen,
+    status,
+    low_cves,
+    moderate_cves,
+    important_cves,
+    critical_cves
+FROM crc.openshift_insights_vulnerabilities_v1_clusters
+```
+
+### openshift_insights_vulnerabilities_v1_cluster_cves
+
+#### List CVEs for a cluster
+
+```sql
+SELECT synopsis, severity, cvss3_score
+FROM crc.openshift_insights_vulnerabilities_v1_cluster_cves
+WHERE cluster_id = 'a5192f07-c608-40bb-8166-cf012af8c5b2'
+```
+
+#### List CVEs for a cluster with a severity filter
+
+```sql
+SELECT synopsis, severity, cvss3_score
+FROM crc.openshift_insights_vulnerabilities_v1_cluster_cves
+WHERE cluster_id = 'a5192f07-c608-40bb-8166-cf012af8c5b2'
+AND severity = 'Low'
+```
+
+### openshift_insights_vulnerabilities_v1_cluster_exposed_images
+
+#### List exposed images for a cluster
+
+```sql
+SELECT name, registry, version
+FROM crc.openshift_insights_vulnerabilities_v1_cluster_exposed_images
+WHERE cluster_id = 'a5192f07-c608-40bb-8166-cf012af8c5b2'
+```
+
+### openshift_insights_vulnerabilities_v1_cves
+
+#### List all CVEs affecting the current workload
+
+```sql
+SELECT synopsis, severity, cvss3_score, clusters_exposed, images_exposed
+FROM crc.openshift_insights_vulnerabilities_v1_cves
+ORDER BY cvss3_score DESC
+LIMIT 10
+```
+
+### openshift_insights_vulnerabilities_v1_cves_exposed_clusters
+
+#### List clusters exposed to a specific CVE
+
+```sql
+SELECT display_name, id, version, provider, status
+FROM crc.openshift_insights_vulnerabilities_v1_cves_exposed_clusters
+WHERE cve_name = 'CVE-2023-2602'
+```
+
+### openshift_insights_vulnerabilities_v1_cves_exposed_images
+
+#### List images exposed to a specific CVE
+
+```sql
+SELECT name, registry, version, clusters_exposed
+FROM crc.openshift_insights_vulnerabilities_v1_cves_exposed_images
+WHERE cve_name = 'CVE-2023-2602'
+ORDER BY clusters_exposed DESC
+```
