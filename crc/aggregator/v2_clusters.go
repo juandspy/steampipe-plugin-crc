@@ -14,7 +14,7 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
-const V2Clusters = "openshift_insights_aggregator_v2_clusters"
+const V2ClustersTableName = "openshift_insights_aggregator_v2_clusters"
 
 type ClustersResponseV2 struct {
 	Data []struct {
@@ -39,7 +39,7 @@ type ClustersResponseV2 struct {
 
 func TableClustersV2(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        V2Clusters,
+		Name:        V2ClustersTableName,
 		Description: "Retrieves all clusters for given organization, retrieves the impacting rules for each cluster and calculates the count of impacting rules by total risk (severity == critical, high, moderate, low).",
 		List: &plugin.ListConfig{
 			Hydrate: listClustersV2,
@@ -96,20 +96,20 @@ func listClustersV2(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 	timeout := 60 * time.Second // this API endpoint is very slow
 	client, err := utils.GetConsoleDotClient(ctx, d, timeout)
 	if err != nil {
-		utils.LogErrorUsingSteampipeLogger(ctx, V2Clusters, functionName, "client_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V2ClustersTableName, functionName, "client_error", err)
 		return nil, err
 	}
 
 	url := "https://console.redhat.com/api/insights-results-aggregator/v2/clusters"
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		utils.LogErrorUsingSteampipeLogger(ctx, V2Clusters, functionName, "request_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V2ClustersTableName, functionName, "request_error", err)
 		return nil, err
 	}
 
 	resp, err := client.Do(req)
 	if err != nil {
-		utils.LogErrorUsingSteampipeLogger(ctx, V2Clusters, functionName, "api_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V2ClustersTableName, functionName, "api_error", err)
 		return nil, err
 	}
 
@@ -117,13 +117,13 @@ func listClustersV2(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 
 	clusterResponse, err := decodeClustersV2(resp.Body)
 	if err != nil {
-		utils.LogErrorUsingSteampipeLogger(ctx, V2Clusters, functionName, "decode_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V2ClustersTableName, functionName, "decode_error", err)
 		return nil, err
 	}
 
 	if resp.StatusCode != 200 {
 		err = errors.New(clusterResponse.Status)
-		utils.LogErrorUsingSteampipeLogger(ctx, V2Clusters, functionName, "api_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V2ClustersTableName, functionName, "api_error", err)
 		return nil, err
 	}
 

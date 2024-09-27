@@ -12,7 +12,7 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
-const V1GatheringRules = "openshift_insights_gcs_v1_gathering_rules"
+const V1GatheringRulesTableName = "openshift_insights_gcs_v1_gathering_rules"
 
 type gatheringRulesV1 struct {
 	Version string `json:"version"`
@@ -24,7 +24,7 @@ type gatheringRulesV1 struct {
 
 func TableGatheringRulesV1(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        V1GatheringRules,
+		Name:        V1GatheringRulesTableName,
 		Description: "Return a list of versioned gathering rules.",
 		List: &plugin.ListConfig{
 			Hydrate: listGatheringRulesV1,
@@ -57,27 +57,27 @@ func listGatheringRulesV1(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	const functionName = "listGatheringRulesV1"
 	client, err := utils.GetConsoleDotClient(ctx, d, utils.DefaultTimeout)
 	if err != nil {
-		utils.LogErrorUsingSteampipeLogger(ctx, V1GatheringRules, functionName, "client_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1GatheringRulesTableName, functionName, "client_error", err)
 		return nil, err
 	}
 
 	url := "https://console.redhat.com/api/gathering/v1/gathering_rules"
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		utils.LogErrorUsingSteampipeLogger(ctx, V1GatheringRules, functionName, "request_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1GatheringRulesTableName, functionName, "request_error", err)
 		return nil, err
 	}
 
 	resp, err := client.Do(req)
 	if err != nil {
-		utils.LogErrorUsingSteampipeLogger(ctx, V1GatheringRules, functionName, "api_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1GatheringRulesTableName, functionName, "api_error", err)
 		return nil, err
 	}
 	defer resp.Body.Close()
 
 	rules, err := decodeGatheringRulesV1(resp.Body)
 	if err != nil {
-		utils.LogErrorUsingSteampipeLogger(ctx, V1GatheringRules, functionName, "decode_error", err)
+		utils.LogErrorUsingSteampipeLogger(ctx, V1GatheringRulesTableName, functionName, "decode_error", err)
 		return nil, err
 	}
 
