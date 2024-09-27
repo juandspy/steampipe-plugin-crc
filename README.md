@@ -170,3 +170,13 @@ FROM crc.openshift_insights_vulnerabilities_v1_cluster_cves
 WHERE cluster_id = 'a5192f07-c608-40bb-8166-cf012af8c5b2'
 AND severity = 'Low'
 ```
+
+### openshift_insights_vulnerabilities_v1_cluster_exposed_images
+
+#### List exposed images for a cluster
+
+```sql
+SELECT name, registry, version
+FROM crc.openshift_insights_vulnerabilities_v1_cluster_exposed_images
+WHERE cluster_id = 'a5192f07-c608-40bb-8166-cf012af8c5b2'
+```
