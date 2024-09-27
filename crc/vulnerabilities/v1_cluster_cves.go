@@ -17,6 +17,7 @@ const V1ClusterCVEsTableName = "openshift_insights_vulnerabilities_v1_cluster_cv
 
 type vulnerabilitiesV1ClusterCVEsResponse struct {
 	Data []struct {
+		ClusterID   string  `json:"cluster_id,omitempty"` // added extra field to match the table schema
 		CVSS2Score  float64 `json:"cvss2_score"`
 		CVSS3Score  float64 `json:"cvss3_score"`
 		Description string  `json:"description"`
@@ -41,49 +42,49 @@ func TableClusterCVEsV1(_ context.Context) *plugin.Table {
 				Name:        "cluster_id",
 				Type:        proto.ColumnType_STRING,
 				Description: "The Cluster ID.",
-				Transform:   transform.FromQual("cluster_id"),
+				Transform:   transform.FromField("ClusterID"),
 			},
 			{
 				Name:        "cvss2_score",
 				Type:        proto.ColumnType_DOUBLE,
 				Description: "CVSS2 score of the CVE.",
-				Transform:   transform.FromField("cvss2_score"),
+				Transform:   transform.FromField("CVSS2Score"),
 			},
 			{
 				Name:        "cvss3_score",
 				Type:        proto.ColumnType_DOUBLE,
 				Description: "CVSS3 score of the CVE.",
-				Transform:   transform.FromField("cvss3_score"),
+				Transform:   transform.FromField("CVSS3Score"),
 			},
 			{
 				Name:        "description",
 				Type:        proto.ColumnType_STRING,
 				Description: "Description of the CVE.",
-				Transform:   transform.FromField("description"),
+				Transform:   transform.FromField("Description"),
 			},
 			{
 				Name:        "exploits",
 				Type:        proto.ColumnType_BOOL,
 				Description: "Whether the CVE has known exploits.",
-				Transform:   transform.FromField("exploits"),
+				Transform:   transform.FromField("Exploits"),
 			},
 			{
 				Name:        "publish_date",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Description: "The date the CVE was published.",
-				Transform:   transform.FromField("publish_date"),
+				Transform:   transform.FromField("PublishDate"),
 			},
 			{
 				Name:        "severity",
 				Type:        proto.ColumnType_STRING,
 				Description: "Severity level of the CVE.",
-				Transform:   transform.FromField("severity"),
+				Transform:   transform.FromField("Severity"),
 			},
 			{
 				Name:        "synopsis",
 				Type:        proto.ColumnType_STRING,
 				Description: "Brief summary of the CVE.",
-				Transform:   transform.FromField("synopsis"),
+				Transform:   transform.FromField("Synopsis"),
 			},
 		},
 	}
@@ -113,17 +114,8 @@ func getVulnerabilitiesClusterCVEsV1(ctx context.Context, d *plugin.QueryData, h
 	}
 
 	for _, cve := range cveResponse.Data {
-		// TODO: Simplify this
-		row := map[string]interface{}{}
-		row["cluster_id"] = clusterID
-		row["synopsis"] = cve.Synopsis
-		row["cvss2_score"] = cve.CVSS2Score
-		row["cvss3_score"] = cve.CVSS3Score
-		row["description"] = cve.Description
-		row["exploits"] = cve.Exploits
-		row["publish_date"] = cve.PublishDate
-		row["severity"] = cve.Severity
-		d.StreamListItem(ctx, row)
+		cve.ClusterID = clusterID
+		d.StreamListItem(ctx, cve)
 	}
 
 	return nil, nil

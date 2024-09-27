@@ -45,61 +45,61 @@ func TableClustersV1(_ context.Context) *plugin.Table {
 				Name:        "cluster_id",
 				Type:        proto.ColumnType_STRING,
 				Description: "Cluster ID.",
-				Transform:   transform.FromField("cluster_id"),
+				Transform:   transform.FromField("ID"),
 			},
 			{
 				Name:        "display_name",
 				Type:        proto.ColumnType_STRING,
 				Description: "Cluster display name.",
-				Transform:   transform.FromField("display_name"),
+				Transform:   transform.FromField("DisplayName"),
 			},
 			{
 				Name:        "version",
 				Type:        proto.ColumnType_STRING,
 				Description: "Cluster version.",
-				Transform:   transform.FromField("version"),
+				Transform:   transform.FromField("Version"),
 			},
 			{
 				Name:        "provider",
 				Type:        proto.ColumnType_STRING,
 				Description: "Provider of the cluster.",
-				Transform:   transform.FromField("provider"),
+				Transform:   transform.FromField("Provider"),
 			},
 			{
 				Name:        "last_seen",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Description: "The time the cluster was last checked at.",
-				Transform:   transform.FromField("last_seen"),
+				Transform:   transform.FromField("LastSeen"),
 			},
 			{
 				Name:        "status",
 				Type:        proto.ColumnType_STRING,
 				Description: "Status of the cluster.",
-				Transform:   transform.FromField("status"),
+				Transform:   transform.FromField("Status"),
 			},
 			{
 				Name:        "low_cves",
 				Type:        proto.ColumnType_INT,
 				Description: "The total low CVEs.",
-				Transform:   transform.FromField("low_cves"),
+				Transform:   transform.FromField("CvesSeverity.Low"),
 			},
 			{
 				Name:        "moderate_cves",
 				Type:        proto.ColumnType_INT,
 				Description: "The total moderate CVEs.",
-				Transform:   transform.FromField("moderate_cves"),
+				Transform:   transform.FromField("CvesSeverity.Moderate"),
 			},
 			{
 				Name:        "important_cves",
 				Type:        proto.ColumnType_INT,
 				Description: "The total important CVEs.",
-				Transform:   transform.FromField("important_cves"),
+				Transform:   transform.FromField("CvesSeverity.Important"),
 			},
 			{
 				Name:        "critical_cves",
 				Type:        proto.ColumnType_INT,
 				Description: "The total critical CVEs.",
-				Transform:   transform.FromField("critical_cves"),
+				Transform:   transform.FromField("CvesSeverity.Critical"),
 			},
 		},
 	}
@@ -129,19 +129,7 @@ func listVulnerabilitiesClustersV1(ctx context.Context, d *plugin.QueryData, h *
 	}
 
 	for _, cluster := range clusterResponse.Data {
-		// TODO: Simplify this
-		row := map[string]interface{}{}
-		row["cluster_id"] = cluster.ID
-		row["display_name"] = cluster.DisplayName
-		row["version"] = cluster.Version
-		row["provider"] = cluster.Provider
-		row["last_seen"] = cluster.LastSeen
-		row["status"] = cluster.Status
-		row["low_cves"] = cluster.CvesSeverity.Low
-		row["moderate_cves"] = cluster.CvesSeverity.Moderate
-		row["important_cves"] = cluster.CvesSeverity.Important
-		row["critical_cves"] = cluster.CvesSeverity.Critical
-		d.StreamListItem(ctx, row)
+		d.StreamListItem(ctx, cluster)
 	}
 
 	return nil, nil
