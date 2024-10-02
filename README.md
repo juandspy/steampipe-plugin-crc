@@ -2,14 +2,38 @@
 
 Use SQL to query [console.redhat.com APIs](console.redhat.com/docs/api).
 
-Get started: // TODO: Link to https://hub.steampipe.io/plugins/jdiazsua/crc
-Documentation: Table definitions & examples // TODO: Link to https://hub.steampipe.io/plugins/jdiazsua/crc/tables
-Community: // TODO: link to a Slack channel
-Get involved: // TODO: link to issues
+Get started: https://hub.steampipe.io/plugins/juandspy/crc
+
+Documentation: [Table definitions & examples](https://hub.steampipe.io/plugins/juandspy/crc/tables)
+
+Community:
+
+Get involved: https://github.com/juandspy/steampipe-plugin-crc/issues
 
 ##  Quick start
 
-// TODO
+Install the plugin with [Steampipe](https://steampipe.io):
+
+```shell
+steampipe plugin install juandspy/crc
+```
+
+Authenticate with the plugin:
+
+```
+export CRC_CLIENT_ID="12345678-0000-1111-2222-123456789012"
+export CRC_CLIENT_SECRET="abcdefghijklmnopqrstuvwxyz123456"
+```
+
+Run a query:
+
+```sql
+SELECT
+    cluster_name, cluster_version,
+    total_hit_count, hits_by_total_risk
+FROM crc_openshift_insights_aggregator_v2_clusters
+LIMIT 3
+```
 
 ## Developing
 
@@ -60,156 +84,4 @@ Further reading:
 
 ## Examples
 
-### openshift_insights_aggregator_v2_clusters
-
-The queries involving this table takes some time because the API endpoint is quite slow.
-
-#### List your clusters
-
-```sql
-SELECT
-    cluster_id, cluster_name, cluster_version, managed, last_checked_at,
-    total_hit_count, hits_by_total_risk
-FROM crc_openshift_insights_aggregator_v2_clusters
-LIMIT 10
-```
-
-#### Find problematic clusters
-
-```sql
-SELECT
-    cluster_id, cluster_name, cluster_version, managed, last_checked_at,
-    total_hit_count, hits_by_total_risk
-FROM crc_openshift_insights_aggregator_v2_clusters
-WHERE total_hit_count > 4
-```
-
-### openshift_insights_aggregator_v2_cluster_reports
-
-#### List cluster rules with total risk
-
-```sql
-SELECT cluster_id, rule_id, total_risk
-FROM crc_openshift_insights_aggregator_v2_cluster_reports
-WHERE cluster_id = '5a78700a-e3d3-4300-a796-75bf73fc1653'
-```
-
-### openshift_insights_gcs_v1_gathering_rules
-
-```sql
-SELECT version, conditions, gathering_functions
-FROM crc_openshift_insights_gcs_v1_gathering_rules;
-```
-
-### openshift_insights_gcs_v2_gathering_rules
-
-#### Get the gathering rules for a valid version
-
-```sql
-
-SELECT version, conditional_gathering_rules, container_logs
-FROM crc_openshift_insights_gcs_v2_gathering_rules
-WHERE ocp_version = '4.17.0';
-```
-
-#### Get the gathering rules for a version that is not available
-
-```sql
-
-SELECT version, conditional_gathering_rules, container_logs
-FROM crc_openshift_insights_gcs_v2_gathering_rules
-WHERE ocp_version = '3.0.0';
-```
-
-This will print a 404 error.
-
-#### Get the gathering rules for wrong version
-
-```sql
-
-SELECT version, conditional_gathering_rules, container_logs
-FROM crc_openshift_insights_gcs_v2_gathering_rules
-WHERE ocp_version = 'foo';
-```
-
-This will print a 400 error.
-
-### openshift_insights_vulnerabilities_v1_clusters
-
-#### List your clusters
-
-```sql
-SELECT
-    cluster_id,
-    display_name,
-    version,
-    provider,
-    last_seen,
-    status,
-    low_cves,
-    moderate_cves,
-    important_cves,
-    critical_cves
-FROM crc_openshift_insights_vulnerabilities_v1_clusters
-```
-
-### openshift_insights_vulnerabilities_v1_cluster_cves
-
-#### List CVEs for a cluster
-
-```sql
-SELECT synopsis, severity, cvss3_score
-FROM crc_openshift_insights_vulnerabilities_v1_cluster_cves
-WHERE cluster_id = 'a5192f07-c608-40bb-8166-cf012af8c5b2'
-```
-
-#### List CVEs for a cluster with a severity filter
-
-```sql
-SELECT synopsis, severity, cvss3_score
-FROM crc_openshift_insights_vulnerabilities_v1_cluster_cves
-WHERE cluster_id = 'a5192f07-c608-40bb-8166-cf012af8c5b2'
-AND severity = 'Low'
-```
-
-### openshift_insights_vulnerabilities_v1_cluster_exposed_images
-
-#### List exposed images for a cluster
-
-```sql
-SELECT name, registry, version
-FROM crc_openshift_insights_vulnerabilities_v1_cluster_exposed_images
-WHERE cluster_id = 'a5192f07-c608-40bb-8166-cf012af8c5b2'
-```
-
-### openshift_insights_vulnerabilities_v1_cves
-
-#### List all CVEs affecting the current workload
-
-```sql
-SELECT synopsis, severity, cvss3_score, clusters_exposed, images_exposed
-FROM crc_openshift_insights_vulnerabilities_v1_cves
-ORDER BY cvss3_score DESC
-LIMIT 10
-```
-
-### openshift_insights_vulnerabilities_v1_cves_exposed_clusters
-
-#### List clusters exposed to a specific CVE
-
-```sql
-SELECT display_name, id, version, provider, status
-FROM crc_openshift_insights_vulnerabilities_v1_cves_exposed_clusters
-WHERE cve_name = 'CVE-2023-2602'
-```
-
-### openshift_insights_vulnerabilities_v1_cves_exposed_images
-
-#### List images exposed to a specific CVE
-
-```sql
-SELECT name, registry, version, clusters_exposed
-FROM crc_openshift_insights_vulnerabilities_v1_cves_exposed_images
-WHERE cve_name = 'CVE-2023-2602'
-ORDER BY clusters_exposed DESC
-```
+Visit the [tables folder](./docs/tables) for examples.
