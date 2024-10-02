@@ -12,9 +12,9 @@ connection "crc" {
 
   # The client ID to access the console.redhat.com cloud instance
   # Can also be set with the `CRC_CLIENT_ID` environment variable.
-  # client_id = "XXXXX"
+  # client_id = "12345678-0000-1111-2222-123456789012"
 
   # The client secret to access the console.redhat.com cloud instance
   # Can also be set with the `CRC_CLIENT_SECRET` environment variable.
-  # client_secret = "XXXXX"
+  # client_secret = "abcdefghijklmnopqrstuvwxyz123456"
 }
