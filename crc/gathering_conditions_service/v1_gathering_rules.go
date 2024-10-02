@@ -11,7 +11,7 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
-const V1GatheringRulesTableName = "openshift_insights_gcs_v1_gathering_rules"
+const V1GatheringRulesTableName = "crc_openshift_insights_gcs_v1_gathering_rules"
 
 type gatheringRulesV1 struct {
 	Version string `json:"version"`

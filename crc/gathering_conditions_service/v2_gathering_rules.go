@@ -13,7 +13,7 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
-const V2RemoteConfigurationTableName = "openshift_insights_gcs_v2_gathering_rules"
+const V2RemoteConfigurationTableName = "crc_openshift_insights_gcs_v2_gathering_rules"
 
 type gatheringRulesV2 struct {
 	Version                   string        `json:"version,omitempty"`

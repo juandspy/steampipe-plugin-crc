@@ -15,7 +15,7 @@ import (
 	"github.com/juandspy/steampipe-plugin-crc/crc/utils"
 )
 
-const V2ClusterReportsTableName = "openshift_insights_aggregator_v2_cluster_reports"
+const V2ClusterReportsTableName = "crc_openshift_insights_aggregator_v2_cluster_reports"
 
 type ClusterReportsResponseV2 struct {
 	Report struct {
@@ -56,7 +56,7 @@ type ClusterReportsResponseV2 struct {
 
 func TableClusterReportsV2(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "openshift_insights_aggregator_v2_cluster_reports",
+		Name:        V2ClusterReportsTableName,
 		Description: "Returns the latest report for the given cluster.",
 		List: &plugin.ListConfig{
 			Hydrate:    listClusterReportsV2,

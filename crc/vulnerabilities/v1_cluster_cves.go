@@ -13,7 +13,7 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
-const V1ClusterCVEsTableName = "openshift_insights_vulnerabilities_v1_cluster_cves"
+const V1ClusterCVEsTableName = "crc_openshift_insights_vulnerabilities_v1_cluster_cves"
 
 type vulnerabilitiesV1ClusterCVEsResponse struct {
 	Data []struct {

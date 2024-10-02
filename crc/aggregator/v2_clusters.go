@@ -12,7 +12,7 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
-const V2ClustersTableName = "openshift_insights_aggregator_v2_clusters"
+const V2ClustersTableName = "crc_openshift_insights_aggregator_v2_clusters"
 
 type ClustersResponseV2 struct {
 	Data []struct {

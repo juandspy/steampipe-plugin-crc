@@ -45,7 +45,7 @@ Try it!
 ```
 steampipe query
 > .inspect crc
-> SELECT version, conditions, gathering_functions FROM crc.openshift_insights_gcs_v1_gathering_rules;
+> SELECT version, conditions, gathering_functions FROM crc_openshift_insights_gcs_v1_gathering_rules;
 ```
 
 You can check the plugin and steampipe logs using
@@ -70,7 +70,7 @@ The queries involving this table takes some time because the API endpoint is qui
 SELECT
     cluster_id, cluster_name, cluster_version, managed, last_checked_at,
     total_hit_count, hits_by_total_risk
-FROM crc.openshift_insights_aggregator_v2_clusters
+FROM crc_openshift_insights_aggregator_v2_clusters
 LIMIT 10
 ```
 
@@ -80,7 +80,7 @@ LIMIT 10
 SELECT
     cluster_id, cluster_name, cluster_version, managed, last_checked_at,
     total_hit_count, hits_by_total_risk
-FROM crc.openshift_insights_aggregator_v2_clusters
+FROM crc_openshift_insights_aggregator_v2_clusters
 WHERE total_hit_count > 4
 ```
 
@@ -90,7 +90,7 @@ WHERE total_hit_count > 4
 
 ```sql
 SELECT cluster_id, rule_id, total_risk
-FROM crc.openshift_insights_aggregator_v2_cluster_reports
+FROM crc_openshift_insights_aggregator_v2_cluster_reports
 WHERE cluster_id = '5a78700a-e3d3-4300-a796-75bf73fc1653'
 ```
 
@@ -98,7 +98,7 @@ WHERE cluster_id = '5a78700a-e3d3-4300-a796-75bf73fc1653'
 
 ```sql
 SELECT version, conditions, gathering_functions
-FROM crc.openshift_insights_gcs_v1_gathering_rules;
+FROM crc_openshift_insights_gcs_v1_gathering_rules;
 ```
 
 ### openshift_insights_gcs_v2_gathering_rules
@@ -108,7 +108,7 @@ FROM crc.openshift_insights_gcs_v1_gathering_rules;
 ```sql
 
 SELECT version, conditional_gathering_rules, container_logs
-FROM crc.openshift_insights_gcs_v2_gathering_rules
+FROM crc_openshift_insights_gcs_v2_gathering_rules
 WHERE ocp_version = '4.17.0';
 ```
 
@@ -117,7 +117,7 @@ WHERE ocp_version = '4.17.0';
 ```sql
 
 SELECT version, conditional_gathering_rules, container_logs
-FROM crc.openshift_insights_gcs_v2_gathering_rules
+FROM crc_openshift_insights_gcs_v2_gathering_rules
 WHERE ocp_version = '3.0.0';
 ```
 
@@ -128,7 +128,7 @@ This will print a 404 error.
 ```sql
 
 SELECT version, conditional_gathering_rules, container_logs
-FROM crc.openshift_insights_gcs_v2_gathering_rules
+FROM crc_openshift_insights_gcs_v2_gathering_rules
 WHERE ocp_version = 'foo';
 ```
 
@@ -150,7 +150,7 @@ SELECT
     moderate_cves,
     important_cves,
     critical_cves
-FROM crc.openshift_insights_vulnerabilities_v1_clusters
+FROM crc_openshift_insights_vulnerabilities_v1_clusters
 ```
 
 ### openshift_insights_vulnerabilities_v1_cluster_cves
@@ -159,7 +159,7 @@ FROM crc.openshift_insights_vulnerabilities_v1_clusters
 
 ```sql
 SELECT synopsis, severity, cvss3_score
-FROM crc.openshift_insights_vulnerabilities_v1_cluster_cves
+FROM crc_openshift_insights_vulnerabilities_v1_cluster_cves
 WHERE cluster_id = 'a5192f07-c608-40bb-8166-cf012af8c5b2'
 ```
 
@@ -167,7 +167,7 @@ WHERE cluster_id = 'a5192f07-c608-40bb-8166-cf012af8c5b2'
 
 ```sql
 SELECT synopsis, severity, cvss3_score
-FROM crc.openshift_insights_vulnerabilities_v1_cluster_cves
+FROM crc_openshift_insights_vulnerabilities_v1_cluster_cves
 WHERE cluster_id = 'a5192f07-c608-40bb-8166-cf012af8c5b2'
 AND severity = 'Low'
 ```
@@ -178,7 +178,7 @@ AND severity = 'Low'
 
 ```sql
 SELECT name, registry, version
-FROM crc.openshift_insights_vulnerabilities_v1_cluster_exposed_images
+FROM crc_openshift_insights_vulnerabilities_v1_cluster_exposed_images
 WHERE cluster_id = 'a5192f07-c608-40bb-8166-cf012af8c5b2'
 ```
 
@@ -188,7 +188,7 @@ WHERE cluster_id = 'a5192f07-c608-40bb-8166-cf012af8c5b2'
 
 ```sql
 SELECT synopsis, severity, cvss3_score, clusters_exposed, images_exposed
-FROM crc.openshift_insights_vulnerabilities_v1_cves
+FROM crc_openshift_insights_vulnerabilities_v1_cves
 ORDER BY cvss3_score DESC
 LIMIT 10
 ```
@@ -199,7 +199,7 @@ LIMIT 10
 
 ```sql
 SELECT display_name, id, version, provider, status
-FROM crc.openshift_insights_vulnerabilities_v1_cves_exposed_clusters
+FROM crc_openshift_insights_vulnerabilities_v1_cves_exposed_clusters
 WHERE cve_name = 'CVE-2023-2602'
 ```
 
@@ -209,7 +209,7 @@ WHERE cve_name = 'CVE-2023-2602'
 
 ```sql
 SELECT name, registry, version, clusters_exposed
-FROM crc.openshift_insights_vulnerabilities_v1_cves_exposed_images
+FROM crc_openshift_insights_vulnerabilities_v1_cves_exposed_images
 WHERE cve_name = 'CVE-2023-2602'
 ORDER BY clusters_exposed DESC
 ```
