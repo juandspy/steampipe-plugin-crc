@@ -30,3 +30,50 @@ SELECT
     critical_cves
 FROM crc_openshift_insights_vulnerabilities_v1_clusters
 ```
+
+### List clusters with critical vulnerabilities
+This query retrieves clusters that have critical vulnerabilities, allowing you to focus on the most urgent security issues.
+
+```sql
+SELECT
+    cluster_id,
+    display_name,
+    critical_cves,
+    last_seen
+FROM crc_openshift_insights_vulnerabilities_v1_clusters
+WHERE critical_cves > 0
+ORDER BY critical_cves DESC
+```
+
+### Count of vulnerabilities by severity
+This query provides a summary of the total number of vulnerabilities categorized by severity level across all clusters.
+
+```sql
+SELECT
+    SUM(low_cves) AS total_low,
+    SUM(moderate_cves) AS total_moderate,
+    SUM(important_cves) AS total_important,
+    SUM(critical_cves) AS total_critical
+FROM crc_openshift_insights_vulnerabilities_v1_clusters
+```
+
+### List the most exposed images along with their cluster details
+This query retrieves the most exposed images from the clusters, providing insights into which images are most frequently identified as exposed.
+
+```sql
+SELECT 
+    e.name AS image_name, 
+    e.registry, 
+    COUNT(e.cluster_id) AS exposure_count, 
+    c.display_name AS cluster_name
+FROM 
+    crc_openshift_insights_vulnerabilities_v1_cluster_exposed_images e
+JOIN 
+    crc_openshift_insights_vulnerabilities_v1_clusters c 
+ON 
+    e.cluster_id = c.cluster_id
+GROUP BY 
+    e.name, e.registry, c.display_name
+ORDER BY 
+    exposure_count DESC;
+```

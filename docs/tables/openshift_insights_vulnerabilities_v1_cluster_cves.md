@@ -30,3 +30,20 @@ WHERE cluster_id = 'a5192f07-c608-40bb-8166-cf012af8c5b2'
 AND severity = 'Low'
 ```
 
+### Count the number of CVEs for a cluster
+
+```sql
+SELECT COUNT(*) AS cve_count
+FROM crc_openshift_insights_vulnerabilities_v1_cluster_cves
+WHERE cluster_id = 'a5192f07-c608-40bb-8166-cf012af8c5b2'
+```
+
+### Join CVEs with cluster details
+
+```sql
+SELECT cve.synopsis, cve.severity, cve.cvss3_score, cluster.display_name
+FROM crc_openshift_insights_vulnerabilities_v1_cluster_cves AS cve
+JOIN crc_openshift_insights_vulnerabilities_v1_clusters AS cluster
+ON cve.cluster_id = cluster.cluster_id
+WHERE cve.cluster_id = 'a5192f07-c608-40bb-8166-cf012af8c5b2'
+```

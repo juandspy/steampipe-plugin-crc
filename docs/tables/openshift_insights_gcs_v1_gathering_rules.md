@@ -17,3 +17,19 @@ from the Gathering Service and uses it to gather custom data from the clusters.
 SELECT version, conditions, gathering_functions
 FROM crc_openshift_insights_gcs_v1_gathering_rules;
 ```
+
+### Get the count of gathering rules by version
+
+```sql
+SELECT version, COUNT(*) AS rule_count
+FROM crc_openshift_insights_gcs_v1_gathering_rules
+GROUP BY version;
+```
+
+### Get the gathering functions for a given condition
+
+```sql
+SELECT *
+FROM crc_openshift_insights_gcs_v1_gathering_rules
+WHERE conditions::jsonb @> '[{"alert":{"name":"KubePodCrashLooping"},"type":"alert_is_firing"}]';
+```

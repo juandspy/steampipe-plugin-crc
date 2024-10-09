@@ -17,3 +17,22 @@ FROM crc_openshift_insights_vulnerabilities_v1_cves_exposed_images
 WHERE cve_name = 'CVE-2023-2602'
 ORDER BY clusters_exposed DESC
 ```
+
+### List the exposed images for the top 5 CVEs in terms of severity 
+
+```sql
+SELECT 
+    e.cve_name, e.name, e.registry, e.version
+FROM (
+    SELECT 
+        synopsis,
+        severity,
+        cvss3_score
+    FROM
+        crc_openshift_insights_vulnerabilities_v1_cluster_cves
+    WHERE cluster_id = 'a5192f07-c608-40bb-8166-cf012af8c5b2'
+    ORDER BY severity DESC
+    LIMIT 5
+) AS cve, crc_openshift_insights_vulnerabilities_v1_cves_exposed_images AS e
+WHERE e.cve_name = cve.synopsis
+```
