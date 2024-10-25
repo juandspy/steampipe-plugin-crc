@@ -1,6 +1,6 @@
 # CRC Plugin for Steampipe
 
-Use SQL to query [console.redhat.com APIs](console.redhat.com/docs/api).
+Use SQL to query [console.redhat.com APIs](https://console.redhat.com/docs/api).
 
 Get started: https://hub.steampipe.io/plugins/juandspy/crc
 
